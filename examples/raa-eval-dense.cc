@@ -36,12 +36,6 @@ experiment(std::string rate)
   ap.Create(1);
   staNodes.Create(30);
 
-  for (size_t i=0; i<3; ++i)
-    {
-      staNodes.Get(i)->AggregateObject(CreateObject<ConstantPositionMobilityModel> ());
-    }
-  ap.Get(0)->AggregateObject(CreateObject<ConstantPositionMobilityModel> ());
-
   Ptr<MatrixPropagationLossModel> lossModel = CreateObject<MatrixPropagationLossModel> ();
   lossModel->SetDefaultLoss (200); // set default loss to 200 dB (no link)
   for (size_t i=0; i<30; ++i)
