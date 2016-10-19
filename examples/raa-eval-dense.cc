@@ -75,12 +75,32 @@ experiment(std::string rate)
   Ipv4AddressHelper address;
   address.setBase("10.0.0.0", "255.255.255.0");
   Ipv4InterfaceContainer apInterface;
-  apInterface = address.assign(apDevice);
+  apInterface = address.Assign(apDevice);
   Ipv4InterfaceContainer staInterface;
-  staInterface = address.assign(staDevices);
+  staInterface = address.Assign(staDevices);
 
   /* Populate Routing Table */
   Ipv4GlobalRoutingHelper::PopulateRoutingTables();
+
+  /* Design the flow */
+  uint64_t port = 9;
+
+  BulkSendHelper source ("ns3::TcpSocketFactory",
+                        InetSocketAddress(apInterface.GetAddress(0), port));
+  source.setAttribute ("MaxBytes", UintegerValue (5120));
+  ApplicationContainer sourceApps = source.Install (ap.Get(0));
+  sourceApps.start(Seconds (0.0));
+  sourceApps.stop(Second (10.0));
+
+  PacketSinkHelper sink ("ns3::TcpSocketFactory",
+                        InetSocketAddress (Ipv4Address::GetAny (), port));
+  ApplicationContainer sinkApps = sink.Install (staNodes);
+  sinkApps.Start (Seconds (0.0));
+  sinkApps.Stop (Seconds (10.0));
+
+  Simulator::Stop (Seconds (10.0));
+  Simulator::Run ();
+  Simulator::Destroy ();
 }
 
 int
