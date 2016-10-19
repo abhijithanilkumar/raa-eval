@@ -9,6 +9,7 @@
 #include "ns3/point-to-point-module.h"
 #include "ns3/wifi-module.h"
 using namespace ns3;
+using namespace std;
 
 Ptr<PacketSink> sink;                         /* Pointer to the packet sink application */
 uint64_t lastTotalRx = 0;                     /* The value of the last total received bytes */
@@ -23,8 +24,66 @@ CalculateThroughput ()
   Simulator::Schedule (MilliSeconds (100), &CalculateThroughput);
 }
 
+void
+experiment(std::string rate)
+{
+  WifiHelper wifi;
+  NodeContainer staNodes;
+  NodeContainer ap;
+  NetDeviceContainer staDevices;
+  NetDeviceContainer apDevice;
 
-int 
+  ap.Create(1);
+  staNodes.Create(30);
+
+  for (size_t i=0; i<3; ++i)
+    {
+      staNodes.Get(i)->AggregateObject(CreateObject<ConstantPositionMobilityModel> ());
+    }
+  ap.Get(0)->AggregateObject(CreateObject<ConstantPositionMobilityModel> ());
+
+  Ptr<MatrixPropagationLossModel> lossModel = CreateObject<MatrixPropagationLossModel> ();
+  lossModel->SetDefaultLoss (200); // set default loss to 200 dB (no link)
+  for (size_t i=0; i<30; ++i)
+    lossModel->SetLoss (staNodes.Get (i)->GetObject<MobilityModel>(), ap.Get (0)->GetObject<MobilityModel>(), 50); // set symmetric loss 0 <-> 1 to 50 dB
+
+  Ptr<YansWifiChannel>wifiChannel = CreateObject <YansWifiChannel> ();
+  wifiChannel->SetPropagationModel(lossModel);
+  wifiChannel->SetPropagationDelayModel(CreateObject <ConstantSpeedPropagationDelayModel> ());
+  WifiMacHelper wifiMac;
+  YansWifiPhyHelper wifiPhy = YansWifiPhyHelper::Default();
+  wifiPhy.setChannel(wifiChannel.Create());
+  Ssid ssid = Ssid("raa-test");
+  wifi.setStandard(WIFI_PHY_STANDARD_80211ac);
+  wifi.setRemoteStationManager(rate,
+                               "DataMode",StringValue("DsssRate2Mbps"),
+                               "ControlMode",StringValue("DsssRate1Mbps"));
+  //setup Stations
+  wifiMac.SetType("ns3::StaWifiMac",
+                  "Ssid", SsidValue(ssid));
+  staDevices = wifi.Install(wifiPhy, wifiMac, staNodes);
+  //setup ap
+  wifiMac.SetType("ns::ApWifiMac",
+                  "Ssid", SsidValue(ssid));
+  apDevice = wifi.Install(wifiPhy, wifiMac, ap);
+
+  InternetStackHelper stack;
+  stack.Install(ap);
+  stack.Install(staNodes);
+
+  /* Internet Stack */
+  Ipv4AddressHelper address;
+  address.setBase("10.0.0.0", "255.255.255.0");
+  Ipv4InterfaceContainer apInterface;
+  apInterface = address.assign(apDevice);
+  Ipv4InterfaceContainer staInterface;
+  staInterface = address.assign(staDevices);
+
+  /* Populate Routing Table */
+  Ipv4GlobalRoutingHelper::PopulateRoutingTables();
+}
+
+int
 main (int argc, char *argv[])
 {
   bool verbose = true;
