@@ -35,8 +35,10 @@ main (int argc, char *argv[])
   cmd.Parse (argc,argv);
 
   /* ... */
-
-  Simulator::Run ();
-  Simulator::Destroy ();
+  string raas[] = {"ns3::ArfWifiManager","ns3::AarfWifiManager","ns3::AarfcdWifiManager","ns3::AmrrWifiManager","ns3::CaraWifiManager","ns3::IdealWifiManager","ns3::MinstrelWifiManager","ns3::ParfWifiManager","ns3::OnoeWifiManager","ns3::RraaWifiManager"}
+  for (unsigned int i = 0; a < sizeof(raas)/sizeof(raas[0]); i++ )
+  {
+    experiment(raas[i]);
+  }
   return 0;
 }
