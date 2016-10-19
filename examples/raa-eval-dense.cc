@@ -9,6 +9,7 @@
 #include "ns3/network-module.h"
 #include "ns3/point-to-point-module.h"
 #include "ns3/wifi-module.h"
+#include <string.h>
 using namespace ns3;
 using namespace std;
 
@@ -37,6 +38,12 @@ experiment(std::string rate)
   ap.Create(1);
   staNodes.Create(30);
 
+  //Place Nodes randomly
+  ap.Get (0)->AggregateObject (CreateObject<ConstantPositionMobilityModel> ());
+  for (size_t i = 0; i < 30; ++i)
+    staNodes.Get (i)->AggregateObject (CreateObject<ConstantPositionMobilityModel> ());
+
+  //Limit distanc b/w the nodes using propagation loss.
   Ptr<MatrixPropagationLossModel> lossModel = CreateObject<MatrixPropagationLossModel> ();
   lossModel->SetDefaultLoss (200); // set default loss to 200 dB (no link)
   for (size_t i=0; i<30; ++i)
@@ -50,15 +57,13 @@ experiment(std::string rate)
   wifiPhy.SetChannel(wifiChannel);
   Ssid ssid = Ssid("raa-test");
   wifi.SetStandard(WIFI_PHY_STANDARD_80211b);
-  wifi.SetRemoteStationManager(rate,
-                               "DataMode",StringValue("DsssRate2Mbps"),
-                               "ControlMode",StringValue("DsssRate1Mbps"));
+  wifi.SetRemoteStationManager(rate);
   //setup Stations
   wifiMac.SetType("ns3::StaWifiMac",
                   "Ssid", SsidValue(ssid));
   staDevices = wifi.Install(wifiPhy, wifiMac, staNodes);
   //setup ap
-  wifiMac.SetType("ns::ApWifiMac",
+  wifiMac.SetType("ns3::ApWifiMac",
                   "Ssid", SsidValue(ssid));
   apDevice = wifi.Install(wifiPhy, wifiMac, ap);
 
@@ -93,9 +98,6 @@ experiment(std::string rate)
   sinkApps.Start (Seconds (0.0));
   sinkApps.Stop (Seconds (10.0));
 
-  Simulator::Stop (Seconds (10.0));
-  Simulator::Run ();
-  Simulator::Destroy ();
 }
 
 int
@@ -123,5 +125,9 @@ main (int argc, char *argv[])
   {
     experiment(raas[i]);
   }
+
+  Simulator::Stop (Seconds (10.0));
+  Simulator::Run ();
+  Simulator::Destroy ();
   return 0;
 }
