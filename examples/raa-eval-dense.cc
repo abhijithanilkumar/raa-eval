@@ -2,6 +2,7 @@
 
 #include "ns3/core-module.h"
 #include "ns3/raa-eval-helper.h"
+#include "ns3/propagation-module.h"
 #include "ns3/applications-module.h"
 #include "ns3/internet-module.h"
 #include "ns3/mobility-module.h"
@@ -42,14 +43,14 @@ experiment(std::string rate)
     lossModel->SetLoss (staNodes.Get (i)->GetObject<MobilityModel>(), ap.Get (0)->GetObject<MobilityModel>(), 50); // set symmetric loss 0 <-> 1 to 50 dB
 
   Ptr<YansWifiChannel>wifiChannel = CreateObject <YansWifiChannel> ();
-  wifiChannel->SetPropagationModel(lossModel);
+  wifiChannel->SetPropagationLossModel(lossModel);
   wifiChannel->SetPropagationDelayModel(CreateObject <ConstantSpeedPropagationDelayModel> ());
   WifiMacHelper wifiMac;
   YansWifiPhyHelper wifiPhy = YansWifiPhyHelper::Default();
-  wifiPhy.setChannel(wifiChannel.Create());
+  wifiPhy.SetChannel(wifiChannel);
   Ssid ssid = Ssid("raa-test");
-  wifi.setStandard(WIFI_PHY_STANDARD_80211ac);
-  wifi.setRemoteStationManager(rate,
+  wifi.SetStandard(WIFI_PHY_STANDARD_80211b);
+  wifi.SetRemoteStationManager(rate,
                                "DataMode",StringValue("DsssRate2Mbps"),
                                "ControlMode",StringValue("DsssRate1Mbps"));
   //setup Stations
@@ -67,7 +68,7 @@ experiment(std::string rate)
 
   /* Internet Stack */
   Ipv4AddressHelper address;
-  address.setBase("10.0.0.0", "255.255.255.0");
+  address.SetBase("10.0.0.0", "255.255.255.0");
   Ipv4InterfaceContainer apInterface;
   apInterface = address.Assign(apDevice);
   Ipv4InterfaceContainer staInterface;
@@ -81,10 +82,10 @@ experiment(std::string rate)
 
   BulkSendHelper source ("ns3::TcpSocketFactory",
                         InetSocketAddress(apInterface.GetAddress(0), port));
-  source.setAttribute ("MaxBytes", UintegerValue (5120));
+  source.SetAttribute ("MaxBytes", UintegerValue (5120));
   ApplicationContainer sourceApps = source.Install (ap.Get(0));
-  sourceApps.start(Seconds (0.0));
-  sourceApps.stop(Second (10.0));
+  sourceApps.Start(Seconds (0.0));
+  sourceApps.Stop(Seconds (10.0));
 
   PacketSinkHelper sink ("ns3::TcpSocketFactory",
                         InetSocketAddress (Ipv4Address::GetAny (), port));
@@ -108,8 +109,17 @@ main (int argc, char *argv[])
   cmd.Parse (argc,argv);
 
   /* ... */
-  string raas[] = {"ns3::ArfWifiManager","ns3::AarfWifiManager","ns3::AarfcdWifiManager","ns3::AmrrWifiManager","ns3::CaraWifiManager","ns3::IdealWifiManager","ns3::MinstrelWifiManager","ns3::ParfWifiManager","ns3::OnoeWifiManager","ns3::RraaWifiManager"}
-  for (unsigned int i = 0; a < sizeof(raas)/sizeof(raas[0]); i++ )
+  string raas[] = {"ns3::ArfWifiManager",
+                   "ns3::AarfWifiManager",
+                   "ns3::AarfcdWifiManager",
+                   "ns3::AmrrWifiManager",
+                   "ns3::CaraWifiManager",
+                   "ns3::IdealWifiManager",
+                   "ns3::MinstrelWifiManager",
+                   "ns3::ParfWifiManager",
+                   "ns3::OnoeWifiManager",
+                   "ns3::RraaWifiManager"};
+  for (unsigned int i = 0; i < sizeof(raas)/sizeof(raas[0]); i++ )
   {
     experiment(raas[i]);
   }
