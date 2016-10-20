@@ -1,181 +1,149 @@
-/* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
-/*
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation;
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- */
-
 #include "ns3/core-module.h"
 #include "ns3/point-to-point-module.h"
-#include "ns3/propagation-module.h"
 #include "ns3/network-module.h"
 #include "ns3/applications-module.h"
 #include "ns3/wifi-module.h"
 #include "ns3/mobility-module.h"
 #include "ns3/csma-module.h"
 #include "ns3/internet-module.h"
+#include <fstream>
+
+using namespace ns3;
 using namespace std;
-using namespace ns3;
 
-// Default Network Topology
-//
-// Number of wifi or csma nodes can be increased up to 250
-//                          |
-//                 Rank 0   |   Rank 1
-// -------------------------|----------------------------
-//   Wifi 10.1.3.0
-//                 AP
-//  *    *    *    *
-//  |    |    |    |    10.1.1.0
-// n5   n6   n7   n0 -------------- n1   n2   n3   n4
-//                   point-to-point  |    |    |    |
-//                                   ================
-//                                     LAN 10.1.2.0
+NS_LOG_COMPONENT_DEFINE ("TestScriptExample");
 
-using namespace ns3;
+Ptr<PacketSink> sink1;
+uint64_t lastTotalRx = 0;                     /* The value of the last total received bytes */
 
-NS_LOG_COMPONENT_DEFINE ("ThirdScriptExample");
+void
+CalculateThroughput ()
+{
+  Time now = Simulator::Now ();                                         /* Return the simulator's virtual time. */
+  double cur = (sink1->GetTotalRx() - lastTotalRx) * (double) 8/1e5;     /* Convert Application RX Packets to MBits. */
+  std::cout << now.GetSeconds () << "s: \t" << sink1->GetTotalRx() << cur << " Mbit/s" << std::endl;
+  lastTotalRx = sink1->GetTotalRx ();
+  Simulator::Schedule (MilliSeconds (100), &CalculateThroughput);
+}
 
-int
+void
 experiment (std::string rate)
 {
 
-  NodeContainer p2pNodes;
-  p2pNodes.Create (2);
+uint32_t nWifi = 30;
+double simulationTime = 10.0;
 
-  PointToPointHelper pointToPoint;
-  pointToPoint.SetDeviceAttribute ("DataRate", StringValue ("5Mbps"));
-  pointToPoint.SetChannelAttribute ("Delay", StringValue ("2ms"));
+/* Creating a node container with two nodes */
+NodeContainer p2pNodes;
+p2pNodes.Create (2);
 
-  NetDeviceContainer p2pDevices;
-  p2pDevices = pointToPoint.Install (p2pNodes);
+PointToPointHelper pointToPoint;
+pointToPoint.SetDeviceAttribute ("DataRate", StringValue ("5Mbps"));
+pointToPoint.SetChannelAttribute ("Delay", StringValue ("2ms"));
 
-  NodeContainer wifiStaNodes;
-  wifiStaNodes.Create (30);
-  NodeContainer wifiApNode = p2pNodes.Get (0);
+NetDeviceContainer p2pDevices;
+p2pDevices = pointToPoint.Install (p2pNodes);
 
-  YansWifiChannelHelper channel = YansWifiChannelHelper::Default ();
-  YansWifiPhyHelper phy = YansWifiPhyHelper::Default ();
-  phy.SetChannel (channel.Create ());
+NodeContainer wifiStaNodes;
+wifiStaNodes.Create (nWifi);
+NodeContainer wifiApNode = p2pNodes.Get (0);
 
-  WifiHelper wifi;
-  wifi.SetRemoteStationManager (rate);
+/* Configuring MAC and physical layer properties of the WiFi stations */
+YansWifiChannelHelper channel = YansWifiChannelHelper::Default ();
+YansWifiPhyHelper phy = YansWifiPhyHelper::Default ();
 
-  WifiMacHelper mac;
-  Ssid ssid = Ssid ("ns-3-ssid");
-  mac.SetType ("ns3::StaWifiMac",
-               "Ssid", SsidValue (ssid),
-               "ActiveProbing", BooleanValue (false));
+phy.SetChannel (channel.Create ());
 
-  NetDeviceContainer staDevices;
-  staDevices = wifi.Install (phy, mac, wifiStaNodes);
+WifiHelper wifi = WifiHelper::Default ();
+wifi.SetRemoteStationManager ("ns3::AarfWifiManager");
 
-  wifiApNode.Get (0)->AggregateObject (CreateObject<ConstantPositionMobilityModel> ());
-  for (size_t i = 0; i < 30; ++i)
-    wifiStaNodes.Get (i)->AggregateObject (CreateObject<ConstantPositionMobilityModel> ());
-  Ptr<MatrixPropagationLossModel> lossModel = CreateObject<MatrixPropagationLossModel> ();
-  lossModel->SetDefaultLoss (200); // set default loss to 200 dB (no link)
-  for (size_t i=0; i<30; ++i)
-    lossModel->SetLoss (wifiStaNodes.Get (i)->GetObject<MobilityModel>(), wifiApNode.Get (0)->GetObject<MobilityModel>(), 50); // set symmetric loss 0 <-> 1 to 50 dB
-  Ptr<YansWifiChannel>wifiChannel = CreateObject <YansWifiChannel> ();
-  wifiChannel->SetPropagationLossModel(lossModel);
-  wifiChannel->SetPropagationDelayModel(CreateObject <ConstantSpeedPropagationDelayModel> ());
-  phy.SetChannel (wifiChannel);
+WifiMacHelper mac;
 
-  mac.SetType ("ns3::ApWifiMac",
-               "Ssid", SsidValue (ssid));
+/* Setting the rate control algorithm */
+Ssid ssid = Ssid ("ns-3-ssid");
+mac.SetType ("ns3::StaWifiMac","Ssid", SsidValue (ssid), "ActiveProbing", BooleanValue (false));
 
-  NetDeviceContainer apDevices;
-  apDevices = wifi.Install (phy, mac, wifiApNode);
+NetDeviceContainer staDevices;
+staDevices = wifi.Install (phy, mac, wifiStaNodes);
+
+/* Configuring an AP */
+mac.SetType ("ns3::ApWifiMac","Ssid", SsidValue (ssid));
+NetDeviceContainer apDevices;
+apDevices = wifi.Install (phy, mac, wifiApNode);
+
+/* Configuring the mobility models */
+MobilityHelper mobility;
+mobility.SetPositionAllocator ("ns3::GridPositionAllocator",
+  "MinX", DoubleValue (0.0),
+  "MinY", DoubleValue (0.0),
+  "DeltaX", DoubleValue (5.0),
+  "DeltaY", DoubleValue (10.0),
+  "GridWidth", UintegerValue (3),
+  "LayoutType", StringValue ("RowFirst"));
+
+//mobility.SetMobilityModel ("ns3::RandomWalk2dMobilityModel", "Bounds", RectangleValue (Rectangle (-50, 50, -50, 50)));
+mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
+
+mobility.Install (wifiStaNodes);
+mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
+mobility.Install (wifiApNode);
+
+/* Installing Protocol Stacks */
+InternetStackHelper stack;
+stack.Install (p2pNodes);
+//stack.Install (wifiApNode);
+stack.Install (wifiStaNodes);
+
+/* Setting IPs */
+Ipv4AddressHelper address;
+
+address.SetBase ("10.1.1.0", "255.255.255.0");
+Ipv4InterfaceContainer p2pInterfaces;
+p2pInterfaces = address.Assign (p2pDevices);
+
+address.SetBase ("10.1.3.0", "255.255.255.0");
+Ipv4InterfaceContainer stationInterfaces;
+stationInterfaces = address.Assign (staDevices);
+Ipv4InterfaceContainer accessPointInterfaces;
+accessPointInterfaces = address.Assign (apDevices);
+
+NS_LOG_INFO("Creating Applications...");
+
+uint16_t port = 9090;
+BulkSendHelper source ("ns3::TcpSocketFactory", InetSocketAddress (stationInterfaces.GetAddress(0), port));
+source.SetAttribute ("MaxBytes", UintegerValue (5120));
+ApplicationContainer sourceApps = source.Install (p2pNodes.Get (1));
+sourceApps.Start (Seconds (0.0));
+sourceApps.Stop (Seconds (10.0));
 
 
-  /*MobilityHelper mobility;
+PacketSinkHelper sink ("ns3::TcpSocketFactory",
+                         InetSocketAddress (Ipv4Address::GetAny (), port));
+ApplicationContainer sinkApps = sink.Install (wifiStaNodes.Get(0));
+sinkApps.Start (Seconds (0.0));
+sinkApps.Stop (Seconds (10.0));
 
-  mobility.SetPositionAllocator ("ns3::GridPositionAllocator",
-                                 "MinX", DoubleValue (0.0),
-                                 "MinY", DoubleValue (0.0),
-                                 "DeltaX", DoubleValue (5.0),
-                                 "DeltaY", DoubleValue (10.0),
-                                 "GridWidth", UintegerValue (3),
-                                 "LayoutType", StringValue ("RowFirst"));
+AsciiTraceHelper ascii;
+pointToPoint.EnableAsciiAll(ascii.CreateFileStream("test.tr"));
+pointToPoint.EnablePcapAll("test", true);
+phy.EnablePcap ("test", apDevices.Get (0));
 
-  mobility.SetMobilityModel ("ns3::RandomWalk2dMobilityModel",
-                             "Bounds", RectangleValue (Rectangle (-50, 50, -50, 50)));
-  mobility.Install (wifiStaNodes);
+Ipv4GlobalRoutingHelper::PopulateRoutingTables();
 
-  mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
-  mobility.Install (wifiApNode);*/
+NS_LOG_INFO("Running simulation...");
+//double average_throughput = ((sink1->GetTotalRx() * 8) / (1e6  * simulationTime));
+//Simulator::Schedule (Seconds (1.1), &CalculateThroughput);
+Simulator::Stop(Seconds(10.00));
+Simulator::Run ();
+Simulator::Destroy ();
 
-  InternetStackHelper stack;
-  stack.Install (p2pNodes);
-  stack.Install (wifiStaNodes);
+NS_LOG_INFO("Done.");
 
-  Ipv4AddressHelper address;
+sink1 = DynamicCast<PacketSink>(sinkApps.Get(0));
+std::cout << rate << std::endl;
+std::cout << "Total Bytes Received: " << sink1->GetTotalRx() << std::endl;
+std::cout << "Average Throughput: " << ((sink1->GetTotalRx() * 8) / (1e6  * simulationTime)) << " Mbit/s" << std::endl;
 
-  address.SetBase ("10.1.1.0", "255.255.255.0");
-  Ipv4InterfaceContainer p2pInterfaces;
-  p2pInterfaces = address.Assign (p2pDevices);
-
-  address.SetBase ("10.1.3.0", "255.255.255.0");
-  address.Assign (staDevices);
-  address.Assign (apDevices);
-
-  /*UdpEchoServerHelper echoServer (9);
-
-  ApplicationContainer serverApps = echoServer.Install (csmaNodes.Get (nCsma));
-  serverApps.Start (Seconds (1.0));
-  serverApps.Stop (Seconds (10.0));
-
-  UdpEchoClientHelper echoClient (csmaInterfaces.GetAddress (nCsma), 9);
-  echoClient.SetAttribute ("MaxPackets", UintegerValue (1));
-  echoClient.SetAttribute ("Interval", TimeValue (Seconds (1.0)));
-  echoClient.SetAttribute ("PacketSize", UintegerValue (1024));
-
-  ApplicationContainer clientApps =
-    echoClient.Install (wifiStaNodes.Get (nWifi - 1));
-  clientApps.Start (Seconds (2.0));
-  clientApps.Stop (Seconds (10.0));*/
-
-  /* Design the flow */
-  uint64_t port = 9;
-
-  BulkSendHelper source ("ns3::TcpSocketFactory",
-                        InetSocketAddress(p2pInterfaces.GetAddress(1), port));
-  source.SetAttribute ("MaxBytes", UintegerValue (0));
-  ApplicationContainer sourceApps = source.Install (p2pNodes.Get(1));
-  sourceApps.Start(Seconds (0.0));
-  sourceApps.Stop(Seconds (10.0));
-
-  PacketSinkHelper sink ("ns3::TcpSocketFactory",
-                        InetSocketAddress (Ipv4Address::GetAny (), port));
-  ApplicationContainer sinkApps = sink.Install (wifiStaNodes);
-  sinkApps.Start (Seconds (0.0));
-  sinkApps.Stop (Seconds (10.0));
-
-  Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
-
-  Simulator::Stop (Seconds (10.0));
-
-  phy.EnablePcapAll (rate);
-
-  /*if (tracing == true)
-    {
-      pointToPoint.EnablePcapAll ("third");
-      phy.EnablePcap ("third", apDevices.Get (0));
-    }*/
-
-  Simulator::Run ();
-  Simulator::Destroy ();
-  return 0;
 }
 
 int
@@ -199,10 +167,14 @@ main (int argc, char *argv[])
                    "ns3::ParfWifiManager",
                    "ns3::OnoeWifiManager",
                    "ns3::RraaWifiManager"};
-  /*for (unsigned int i = 0; i < sizeof(raas)/sizeof(raas[0]); i++ )
+  for (unsigned int i = 0; i < sizeof(raas)/sizeof(raas[0]); i++ )
   {
     experiment(raas[i]);
-  }*/
-  experiment(raas[0]);
+    Simulator::Stop (Seconds (10.0));
+    Simulator::Run ();
+    Simulator::Destroy ();
+  }
+
+
   return 0;
 }
