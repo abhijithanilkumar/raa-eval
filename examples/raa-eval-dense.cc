@@ -85,7 +85,7 @@ experiment (std::string rate)
 
   //YansWifiChannelHelper wifiChannel = YansWifiChannelHelper::Default ();
   YansWifiPhyHelper phy = YansWifiPhyHelper::Default ();
-  MobilityHelper mobility;
+  /*MobilityHelper mobility;
 
   mobility.SetPositionAllocator ("ns3::GridPositionAllocator",
                                  "MinX", DoubleValue (10.0),
@@ -96,17 +96,23 @@ experiment (std::string rate)
                                  "LayoutType", StringValue ("RowFirst"));
 
   mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
-  
+
 
   mobility.Install (wifiStaNodes);
 
-  mobility.Install (wifiApNode);
+  mobility.Install (wifiApNode);*/
+
+  p2pNodes.Get (0)->AggregateObject (CreateObject<ConstantPositionMobilityModel> ());
+  for (size_t i = 0; i < nWifi; ++i)
+    {
+      wifiStaNodes.Get (i)->AggregateObject (CreateObject<ConstantPositionMobilityModel> ());
+    }
 
   Ptr<YansWifiChannel> wifiChannel = CreateObject <YansWifiChannel> ();
   Ptr<MatrixPropagationLossModel> lossModel = CreateObject<MatrixPropagationLossModel> ();
-  lossModel->SetDefaultLoss (200); // set default loss to 200 dB (no link)
+  lossModel->SetDefaultLoss (50); // set default loss to 200 dB (no link)
   for (size_t i = 0; i < nWifi; ++i) {
-    lossModel->SetLoss (wifiStaNodes.Get (i)->GetObject<MobilityModel>(), p2pNodes.Get (0)->GetObject<MobilityModel>(), 0);
+    lossModel->SetLoss (wifiStaNodes.Get (i)->GetObject<MobilityModel>(), p2pNodes.Get (0)->GetObject<MobilityModel>(), 50);
   }
   wifiChannel->SetPropagationLossModel (lossModel);
   wifiChannel->SetPropagationDelayModel (CreateObject <ConstantSpeedPropagationDelayModel> ());
@@ -120,7 +126,7 @@ experiment (std::string rate)
   //Config::ConnectWithoutContext("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Mac/MacTxDrop", MakeCallback(&MacTxDrop));
   //Config::ConnectWithoutContext("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Phy/PhyRxDrop", MakeCallback(&PhyRxDrop));
   //Config::ConnectWithoutContext("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Phy/PhyTxDrop", MakeCallback(&PhyTxDrop));
-  
+
   WifiMacHelper mac;
   Ssid ssid = Ssid ("ns-3-ssid");
   mac.SetType ("ns3::StaWifiMac",
@@ -158,18 +164,18 @@ experiment (std::string rate)
   {
   BulkSendHelper source ("ns3::TcpSocketFactory",
                         InetSocketAddress(staInterfaces.GetAddress (i), 5555));
-  source.SetAttribute ("MaxBytes", UintegerValue (0));
+  source.SetAttribute ("MaxBytes", UintegerValue (5120));
   ApplicationContainer sourceApps = source.Install (p2pNodes.Get(1));
   sourceApps.Start(Seconds (0.0));
   sourceApps.Stop(Seconds (10.0));
-  } 
+  }
   PacketSinkHelper sink ("ns3::TcpSocketFactory",
                         InetSocketAddress (Ipv4Address::GetAny (), 5555));
   ApplicationContainer sinkApps = sink.Install (wifiStaNodes);
   sinkApps.Start (Seconds (0.0));
   sinkApps.Stop (Seconds (10.0));
-  
-  
+
+
   //}
   Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
 
@@ -180,7 +186,7 @@ experiment (std::string rate)
   for(uint32_t i = 0; i< nWifi; i++)
   {
   sink1 = DynamicCast<PacketSink>(sinkApps.Get(i));
-  std::cout << rate <<i+1<<std::endl;
+  std::cout << rate <<" Node "<<i+1<<std::endl;
   std::cout << "Total Bytes Received: " << sink1->GetTotalRx() << std::endl;
   std::cout << "Average Throughput: " << ((sink1->GetTotalRx() * 8) / (1e6  * simulationTime)) << " Mbit/s" << std::endl;
   }
@@ -208,10 +214,10 @@ main (int argc, char *argv[])
                    "ns3::ParfWifiManager",
                    "ns3::OnoeWifiManager",
                    "ns3::RraaWifiManager"};
-  for (unsigned int i = 0; i < sizeof(raas)/sizeof(raas[0]); i++ )
+  /*for (unsigned int i = 0; i < sizeof(raas)/sizeof(raas[0]); i++ )
   {
     experiment(raas[i]);
-  }
-  //experiment(raas[0]);
+  }*/
+  experiment(raas[1]);
   return 0;
 }
