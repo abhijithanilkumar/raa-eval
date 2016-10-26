@@ -39,9 +39,10 @@ using namespace ns3;
 
 NS_LOG_COMPONENT_DEFINE ("ThirdScriptExample");
 Ptr<PacketSink> sink1;
-uint64_t lastTotalRx = 0;                     /* The value of the last total received bytes */
+const uint32_t nWifi = 30;
+uint64_t lastTotalRx[nWifi] = {};                     /* The value of the last total received bytes */
 uint32_t MacTxDropCount, PhyTxDropCount, PhyRxDropCount;
-uint32_t nWifi = 30;
+double cdf = 0, sum = 0, avg = 0;
 ApplicationContainer sinkApps;
 
 void
@@ -51,10 +52,14 @@ CalculateThroughput ()
   for(uint32_t i = 0; i< nWifi; i++)
   {
     sink1 = DynamicCast<PacketSink>(sinkApps.Get(i));
-    double cur = (sink1->GetTotalRx() - lastTotalRx) * (double) 8/1e5;     /* Convert Application RX Packets to MBits. */
-    std::cout << now.GetSeconds () << "s: \t" << cur << " Mbit/s" << std::endl;
-    lastTotalRx = sink1->GetTotalRx ();
+    double cur = (sink1->GetTotalRx() - lastTotalRx[i]) * (double) 8/1e5;     /* Convert Application RX Packets to MBits. */
+    lastTotalRx[i] = sink1->GetTotalRx ();
+    sum += cur;
   }
+  avg = sum/nWifi;
+  cdf += avg;
+  //Write the value of cdf to a file.
+  std::cout << now.GetSeconds () << "s: \t" << " " << cdf << " Mbit/s" << std::endl;
   Simulator::Schedule (MilliSeconds (100), &CalculateThroughput);
 }
 
