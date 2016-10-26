@@ -28,18 +28,12 @@ using namespace ns3;
 
 // Default Network Topology
 //
-// Number of wifi or csma nodes can be increased up to 250
-//                          |
-//                 Rank 0   |   Rank 1
-// -------------------------|----------------------------
 //   Wifi 10.1.3.0
 //                 AP
 //  *    *    *    *
 //  |    |    |    |    10.1.1.0
-// n5   n6   n7   n0 -------------- n1   n2   n3   n4
-//                   point-to-point  |    |    |    |
-//                                   ================
-//                                     LAN 10.1.2.0
+// n4   n3   n2   n0 -------------- n1
+//                   point-to-point
 
 using namespace ns3;
 
@@ -47,27 +41,30 @@ NS_LOG_COMPONENT_DEFINE ("ThirdScriptExample");
 Ptr<PacketSink> sink1;
 uint64_t lastTotalRx = 0;                     /* The value of the last total received bytes */
 uint32_t MacTxDropCount, PhyTxDropCount, PhyRxDropCount;
+uint32_t nWifi = 30;
+ApplicationContainer sinkApps;
+
+void
+CalculateThroughput ()
+{
+  Time now = Simulator::Now ();
+  for(uint32_t i = 0; i< nWifi; i++)
+  {
+    sink1 = DynamicCast<PacketSink>(sinkApps.Get(i));
+    double cur = (sink1->GetTotalRx() - lastTotalRx) * (double) 8/1e5;     /* Convert Application RX Packets to MBits. */
+    std::cout << now.GetSeconds () << "s: \t" << cur << " Mbit/s" << std::endl;
+    lastTotalRx = sink1->GetTotalRx ();
+  }
+  Simulator::Schedule (MilliSeconds (100), &CalculateThroughput);
+}
+
 int
 experiment (std::string rate)
 {
-  bool verbose = true;
-  uint32_t nCsma = 3;
-  uint32_t nWifi = 30;
-  //bool tracing = false;
   double simulationTime = 10.0;
 
- if (nWifi > 250 || nCsma > 250)
-    {
-      std::cout << "Too many wifi or csma nodes, no more than 250 each." << std::endl;
-      return 1;
-    }
-
-  if (verbose)
-    {
-      LogComponentEnable ("UdpEchoClientApplication", LOG_LEVEL_INFO);
-      LogComponentEnable ("UdpEchoServerApplication", LOG_LEVEL_INFO);
-    }
-
+  /* Setting threshold=2200 disables RTS-CTS */
+  Config::SetDefault ("ns3::WifiRemoteStationManager::RtsCtsThreshold", UintegerValue(100));
   NodeContainer p2pNodes;
   p2pNodes.Create (2);
 
@@ -83,16 +80,15 @@ experiment (std::string rate)
   NodeContainer wifiApNode = p2pNodes.Get (0);
   NodeContainer ServerNode = p2pNodes.Get (1);
 
-  //YansWifiChannelHelper wifiChannel = YansWifiChannelHelper::Default ();
   YansWifiPhyHelper phy = YansWifiPhyHelper::Default ();
-  /*MobilityHelper mobility;
+  MobilityHelper mobility;
 
   mobility.SetPositionAllocator ("ns3::GridPositionAllocator",
                                  "MinX", DoubleValue (10.0),
                                  "MinY", DoubleValue (10.0),
-                                 "DeltaX", DoubleValue (5.0),
+                                 "DeltaX", DoubleValue (10.0),
                                  "DeltaY", DoubleValue (-10.0),
-                                 "GridWidth", UintegerValue (3),
+                                 "GridWidth", UintegerValue (6),
                                  "LayoutType", StringValue ("RowFirst"));
 
   mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
@@ -100,24 +96,18 @@ experiment (std::string rate)
 
   mobility.Install (wifiStaNodes);
 
-  mobility.Install (wifiApNode);*/
-
-  p2pNodes.Get (0)->AggregateObject (CreateObject<ConstantPositionMobilityModel> ());
-  for (size_t i = 0; i < nWifi; ++i)
-    {
-      wifiStaNodes.Get (i)->AggregateObject (CreateObject<ConstantPositionMobilityModel> ());
-    }
+  mobility.Install (wifiApNode);
 
   Ptr<YansWifiChannel> wifiChannel = CreateObject <YansWifiChannel> ();
   Ptr<MatrixPropagationLossModel> lossModel = CreateObject<MatrixPropagationLossModel> ();
-  lossModel->SetDefaultLoss (50); // set default loss to 200 dB (no link)
+  lossModel->SetDefaultLoss (400); // set default loss to 200 dB (no link)
   for (size_t i = 0; i < nWifi; ++i) {
-    lossModel->SetLoss (wifiStaNodes.Get (i)->GetObject<MobilityModel>(), p2pNodes.Get (0)->GetObject<MobilityModel>(), 50);
+    lossModel->SetLoss (wifiStaNodes.Get (i)->GetObject<MobilityModel>(), p2pNodes.Get (0)->GetObject<MobilityModel>(), 10);
   }
   wifiChannel->SetPropagationLossModel (lossModel);
   wifiChannel->SetPropagationDelayModel (CreateObject <ConstantSpeedPropagationDelayModel> ());
   phy.SetChannel (wifiChannel);
-  phy.SetPcapDataLinkType (YansWifiPhyHelper::DLT_IEEE802_11_RADIO);
+  //phy.SetPcapDataLinkType (YansWifiPhyHelper::DLT_IEEE802_11_RADIO);
 
   WifiHelper wifi;
   wifi.SetRemoteStationManager (rate);
@@ -156,39 +146,40 @@ experiment (std::string rate)
   p2pInterfaces = address.Assign (p2pDevices);
 
   address.SetBase ("10.1.3.0", "255.255.255.0");
+  address.Assign (apDevices);
   Ipv4InterfaceContainer staInterfaces;
   staInterfaces = address.Assign (staDevices);
-  address.Assign (apDevices);
 
   for(uint32_t i = 0; i< nWifi; i++)
   {
-  BulkSendHelper source ("ns3::TcpSocketFactory",
-                        InetSocketAddress(staInterfaces.GetAddress (i), 5555));
-  source.SetAttribute ("MaxBytes", UintegerValue (5120));
-  ApplicationContainer sourceApps = source.Install (p2pNodes.Get(1));
-  sourceApps.Start(Seconds (0.0));
-  sourceApps.Stop(Seconds (10.0));
+    BulkSendHelper source ("ns3::TcpSocketFactory",
+                          InetSocketAddress(staInterfaces.GetAddress (i), 5555));
+    source.SetAttribute ("MaxBytes", UintegerValue (0));
+    ApplicationContainer sourceApps = source.Install (p2pNodes.Get(1));
+    sourceApps.Start(Seconds (0.0));
+    sourceApps.Stop(Seconds (10.0));
   }
   PacketSinkHelper sink ("ns3::TcpSocketFactory",
                         InetSocketAddress (Ipv4Address::GetAny (), 5555));
-  ApplicationContainer sinkApps = sink.Install (wifiStaNodes);
+  sinkApps = sink.Install (wifiStaNodes);
   sinkApps.Start (Seconds (0.0));
   sinkApps.Stop (Seconds (10.0));
 
-
-  //}
   Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
 
+  Simulator::Schedule (MilliSeconds(100), CalculateThroughput);
+
   Simulator::Stop (Seconds (10.0));
-  phy.EnablePcapAll("ad");
+  phy.EnablePcapAll(rate);
   Simulator::Run ();
   Simulator::Destroy ();
+
   for(uint32_t i = 0; i< nWifi; i++)
   {
-  sink1 = DynamicCast<PacketSink>(sinkApps.Get(i));
-  std::cout << rate <<" Node "<<i+1<<std::endl;
-  std::cout << "Total Bytes Received: " << sink1->GetTotalRx() << std::endl;
-  std::cout << "Average Throughput: " << ((sink1->GetTotalRx() * 8) / (1e6  * simulationTime)) << " Mbit/s" << std::endl;
+    sink1 = DynamicCast<PacketSink>(sinkApps.Get(i));
+    std::cout << rate <<" Node "<<i+1<<std::endl;
+    std::cout << "Total Bytes Received: " << sink1->GetTotalRx() << std::endl;
+    std::cout << "Average Throughput: " << ((sink1->GetTotalRx() * 8) / (1e6  * simulationTime)) << " Mbit/s" << std::endl;
   }
   return 0;
 }
