@@ -23,6 +23,8 @@
 #include "ns3/mobility-module.h"
 #include "ns3/csma-module.h"
 #include "ns3/internet-module.h"
+#include <fstream>
+#include "ns3/gnuplot.h"
 using namespace std;
 using namespace ns3;
 
@@ -35,7 +37,6 @@ using namespace ns3;
 // n4   n3   n2   n0 -------------- n1
 //                   point-to-point
 
-using namespace ns3;
 
 NS_LOG_COMPONENT_DEFINE ("ThirdScriptExample");
 Ptr<PacketSink> sink1;
@@ -44,11 +45,13 @@ uint64_t lastTotalRx[nWifi] = {};                     /* The value of the last t
 uint32_t MacTxDropCount, PhyTxDropCount, PhyRxDropCount;
 double cdf = 0, sum = 0, avg = 0;
 ApplicationContainer sinkApps;
+std::ofstream out("arf.txt");
 
 void
 CalculateThroughput ()
 {
   Time now = Simulator::Now ();
+  sum = 0;
   for(uint32_t i = 0; i< nWifi; i++)
   {
     sink1 = DynamicCast<PacketSink>(sinkApps.Get(i));
@@ -59,6 +62,10 @@ CalculateThroughput ()
   avg = sum/nWifi;
   cdf += avg;
   //Write the value of cdf to a file.
+  
+  out << now.GetSeconds () << "\t" <<cdf << std::endl;
+  //thrput[secs] = cdf;
+  //secs++;
   std::cout << now.GetSeconds () << "s: \t" << " " << cdf << " Mbit/s" << std::endl;
   Simulator::Schedule (MilliSeconds (100), &CalculateThroughput);
 }
@@ -171,11 +178,12 @@ experiment (std::string rate)
   sinkApps.Stop (Seconds (10.0));
 
   Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
-
+  //std::string datafile = rate + ".txt";
+    
   Simulator::Schedule (MilliSeconds(100), CalculateThroughput);
 
   Simulator::Stop (Seconds (10.0));
-  phy.EnablePcapAll(rate);
+  //phy.EnablePcapAll(rate);
   Simulator::Run ();
   Simulator::Destroy ();
 
@@ -208,12 +216,14 @@ main (int argc, char *argv[])
                    "ns3::IdealWifiManager",
                    "ns3::MinstrelWifiManager",
                    "ns3::ParfWifiManager",
+                   "ns3::AparfWifiManager",
                    "ns3::OnoeWifiManager",
                    "ns3::RraaWifiManager"};
   /*for (unsigned int i = 0; i < sizeof(raas)/sizeof(raas[0]); i++ )
   {
     experiment(raas[i]);
   }*/
-  experiment(raas[1]);
+  experiment(raas[0]);
+  //PlotGraph();
   return 0;
 }
