@@ -45,7 +45,7 @@ uint64_t lastTotalRx[nWifi] = {};                     /* The value of the last t
 uint32_t MacTxDropCount, PhyTxDropCount, PhyRxDropCount;
 double cdf = 0, sum = 0, avg = 0;
 ApplicationContainer sinkApps;
-std::fstream tput;
+std::fstream file;
 
 void
 CalculateThroughput ()
@@ -61,7 +61,7 @@ CalculateThroughput ()
   }
   avg = sum/nWifi;
   //Write the value of avg Throughput to a file.
-  tput << now.GetSeconds () << "\t" <<avg << std::endl;
+  file << now.GetSeconds () << "\t" <<avg << std::endl;
   std::cout << now.GetSeconds () << "s: \t" << " " << avg << " Mbit/s" << std::endl;
   Simulator::Schedule (MilliSeconds (100), &CalculateThroughput);
 }
@@ -216,7 +216,7 @@ main (int argc, char *argv[])
                    "ns3::RraaWifiManager"};
   for (unsigned int i = 0; i < sizeof(raas)/sizeof(raas[0]); i++ )
   {
-    tput.open (raas[i] + " Average Throughput.txt", std::fstream::out);
+    file.open (raas[i] + " Average Throughput.txt", std::fstream::out);
     experiment(raas[i]);
     file.close();
   }
