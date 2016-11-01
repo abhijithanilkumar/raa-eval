@@ -45,7 +45,7 @@ uint64_t lastTotalRx[nWifi] = {};                     /* The value of the last t
 uint32_t MacTxDropCount, PhyTxDropCount, PhyRxDropCount;
 double cdf = 0, sum = 0, avg = 0;
 ApplicationContainer sinkApps;
-std::ofstream out("arf.txt");
+std::fstream tput;
 
 void
 CalculateThroughput ()
@@ -60,13 +60,9 @@ CalculateThroughput ()
     sum += cur;
   }
   avg = sum/nWifi;
-  cdf += avg;
-  //Write the value of cdf to a file.
-  
-  out << now.GetSeconds () << "\t" <<cdf << std::endl;
-  //thrput[secs] = cdf;
-  //secs++;
-  std::cout << now.GetSeconds () << "s: \t" << " " << cdf << " Mbit/s" << std::endl;
+  //Write the value of avg Throughput to a file.
+  tput << now.GetSeconds () << "\t" <<avg << std::endl;
+  std::cout << now.GetSeconds () << "s: \t" << " " << avg << " Mbit/s" << std::endl;
   Simulator::Schedule (MilliSeconds (100), &CalculateThroughput);
 }
 
@@ -178,8 +174,7 @@ experiment (std::string rate)
   sinkApps.Stop (Seconds (10.0));
 
   Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
-  //std::string datafile = rate + ".txt";
-    
+
   Simulator::Schedule (MilliSeconds(100), CalculateThroughput);
 
   Simulator::Stop (Seconds (10.0));
@@ -219,11 +214,13 @@ main (int argc, char *argv[])
                    "ns3::AparfWifiManager",
                    "ns3::OnoeWifiManager",
                    "ns3::RraaWifiManager"};
-  /*for (unsigned int i = 0; i < sizeof(raas)/sizeof(raas[0]); i++ )
+  for (unsigned int i = 0; i < sizeof(raas)/sizeof(raas[0]); i++ )
   {
+    tput.open (raas[i] + " Average Throughput.txt", std::fstream::out);
     experiment(raas[i]);
-  }*/
-  experiment(raas[0]);
+    file.close();
+  }
+  //experiment(raas[0]);
   //PlotGraph();
   return 0;
 }
