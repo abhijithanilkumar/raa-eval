@@ -41,16 +41,22 @@ using namespace ns3;
 NS_LOG_COMPONENT_DEFINE ("ThirdScriptExample");
 Ptr<PacketSink> sink1;
 const uint32_t nWifi = 30;
-uint64_t lastTotalRx[nWifi] = {};                     /* The value of the last total received bytes */
+uint64_t lastTotalRx[nWifi] = {};    /* The value of the last total received bytes */
 uint32_t MacTxDropCount, PhyTxDropCount, PhyRxDropCount;
-double cdf = 0, sum = 0, avg = 0;
 ApplicationContainer sinkApps;
 std::fstream file;
+
+void initialize ()
+{
+  for (uint32_t i = 0; i < nWifi; i++)
+    lastTotalRx[i] = 0;
+}
 
 void
 CalculateThroughput ()
 {
   Time now = Simulator::Now ();
+  double sum = 0, avg = 0;
   sum = 0;
   for(uint32_t i = 0; i< nWifi; i++)
   {
@@ -217,6 +223,7 @@ main (int argc, char *argv[])
   for (unsigned int i = 0; i < sizeof(raas)/sizeof(raas[0]); i++ )
   {
     file.open (raas[i] + " Average Throughput.txt", std::fstream::out);
+    initialize ();
     experiment(raas[i]);
     file.close();
   }
