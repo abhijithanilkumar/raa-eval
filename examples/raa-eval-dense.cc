@@ -40,7 +40,7 @@ using namespace ns3;
 
 NS_LOG_COMPONENT_DEFINE ("ThirdScriptExample");
 Ptr<PacketSink> sink1;
-const uint32_t nWifi = 30;
+const uint32_t nWifi = 1;
 uint64_t lastTotalRx[nWifi] = {};                     /* The value of the last total received bytes */
 uint32_t MacTxDropCount, PhyTxDropCount, PhyRxDropCount;
 double cdf = 0, sum = 0, avg = 0;
@@ -77,7 +77,7 @@ experiment (std::string rate)
   p2pNodes.Create (2);
 
   PointToPointHelper pointToPoint;
-  pointToPoint.SetDeviceAttribute ("DataRate", StringValue ("5Mbps"));
+  pointToPoint.SetDeviceAttribute ("DataRate", StringValue ("100Mbps"));
   pointToPoint.SetChannelAttribute ("Delay", StringValue ("2ms"));
 
   NetDeviceContainer p2pDevices;
@@ -110,7 +110,7 @@ experiment (std::string rate)
   Ptr<MatrixPropagationLossModel> lossModel = CreateObject<MatrixPropagationLossModel> ();
   lossModel->SetDefaultLoss (400); // set default loss to 200 dB (no link)
   for (size_t i = 0; i < nWifi; ++i) {
-    lossModel->SetLoss (wifiStaNodes.Get (i)->GetObject<MobilityModel>(), p2pNodes.Get (0)->GetObject<MobilityModel>(), 10);
+    lossModel->SetLoss (wifiStaNodes.Get (i)->GetObject<MobilityModel>(), p2pNodes.Get (0)->GetObject<MobilityModel>(), 0);
   }
   wifiChannel->SetPropagationLossModel (lossModel);
   wifiChannel->SetPropagationDelayModel (CreateObject <ConstantSpeedPropagationDelayModel> ());
@@ -119,7 +119,7 @@ experiment (std::string rate)
 
   WifiHelper wifi;
   wifi.SetRemoteStationManager (rate);
-  wifi.SetStandard(WIFI_PHY_STANDARD_80211b);
+  wifi.SetStandard(WIFI_PHY_STANDARD_80211g);
 
   //Config::ConnectWithoutContext("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Mac/MacTxDrop", MakeCallback(&MacTxDrop));
   //Config::ConnectWithoutContext("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Phy/PhyRxDrop", MakeCallback(&PhyRxDrop));
@@ -165,19 +165,19 @@ experiment (std::string rate)
     source.SetAttribute ("MaxBytes", UintegerValue (0));
     ApplicationContainer sourceApps = source.Install (p2pNodes.Get(1));
     sourceApps.Start(Seconds (0.0));
-    sourceApps.Stop(Seconds (10.0));
+    sourceApps.Stop(Seconds (simulationTime));
   }
   PacketSinkHelper sink ("ns3::TcpSocketFactory",
                         InetSocketAddress (Ipv4Address::GetAny (), 5555));
   sinkApps = sink.Install (wifiStaNodes);
   sinkApps.Start (Seconds (0.0));
-  sinkApps.Stop (Seconds (10.0));
+  sinkApps.Stop (Seconds (simulationTime));
 
   Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
 
   Simulator::Schedule (MilliSeconds(100), CalculateThroughput);
 
-  Simulator::Stop (Seconds (10.0));
+  Simulator::Stop (Seconds (simulationTime));
   //phy.EnablePcapAll(rate);
   Simulator::Run ();
   Simulator::Destroy ();
@@ -196,12 +196,12 @@ int
 main (int argc, char *argv[])
 {
   bool verbose = true;
-
+  uint32_t index = 0;
+  
   CommandLine cmd;
   cmd.AddValue ("verbose", "Tell application to log if true", verbose);
-
+  cmd.AddValue ("index", "index of the RAAs", index);
   cmd.Parse (argc,argv);
-
   /* ... */
   string raas[] = {"ns3::ArfWifiManager",
                    "ns3::AarfWifiManager",
@@ -214,12 +214,12 @@ main (int argc, char *argv[])
                    "ns3::AparfWifiManager",
                    "ns3::OnoeWifiManager",
                    "ns3::RraaWifiManager"};
-  for (unsigned int i = 0; i < sizeof(raas)/sizeof(raas[0]); i++ )
-  {
-    file.open (raas[i] + " Average Throughput.txt", std::fstream::out);
-    experiment(raas[i]);
+  //for (unsigned int i = 0; i < sizeof(raas)/sizeof(raas[0]); i++ )
+  //{
+    file.open ("./raa-eval-plots/" + raas[index] + " Average Throughput.txt", std::fstream::out);
+    experiment(raas[index]);
     file.close();
-  }
+  //}
   //experiment(raas[0]);
   //PlotGraph();
   return 0;
