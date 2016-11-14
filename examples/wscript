@@ -4,5 +4,5 @@ def build(bld):
     obj = bld.create_ns3_program('raa-eval-example', ['raa-eval'])
     obj.source = 'raa-eval-example.cc'
 
-    obj = bld.create_ns3_program('raa-eval-dense', ['internet', 'point-to-point', 'mobility', 'wifi', 'applications', 'propagation', 'raa-eval'])
+    obj = bld.create_ns3_program('raa-eval-dense', ['internet', 'point-to-point', 'mobility', 'wifi', 'applications', 'propagation', 'raa-eval', 'flow-monitor'])
     obj.source = 'raa-eval-dense.cc'
