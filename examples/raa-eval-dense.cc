@@ -39,10 +39,11 @@ using namespace ns3;
 
 
 NS_LOG_COMPONENT_DEFINE ("ThirdScriptExample");
-Ptr<PacketSink> sink1;
+Ptr<PacketSink> apSink, staSink;
 const uint32_t nWifi = 30;
 uint64_t lastTotalRx[nWifi] = {};    /* The value of the last total received bytes */
 
+uint64_t lastTotalRxAp = 0;
 uint32_t MacTxDropCount, PhyTxDropCount, PhyRxDropCount;
 ApplicationContainer sinkApps;
 std::fstream file;
@@ -61,15 +62,18 @@ CalculateThroughput ()
   sum = 0;
   for(uint32_t i = 0; i< nWifi; i++)
   {
-    sink1 = DynamicCast<PacketSink>(sinkApps.Get(i));
-    double cur = (sink1->GetTotalRx() - lastTotalRx[i]) * (double) 8/1e5;     /* Convert Application RX Packets to MBits. */
-    lastTotalRx[i] = sink1->GetTotalRx ();
+    staSink = StaticCast<PacketSink>(sinkApps.Get(i));
+    double cur = (staSink->GetTotalRx() - lastTotalRx[i]) * (double) 8/1e5;     /* Convert Application RX Packets to MBits. */
+    lastTotalRx[i] = staSink->GetTotalRx ();
     sum += cur;
   }
   avg = sum/nWifi;
+  double cur = (apSink->GetTotalRx() - lastTotalRxAp) * (double) 8/1e5;     /* Convert Application RX Packets to MBits. */
+  lastTotalRxAp = apSink->GetTotalRx ();
+
   //Write the value of avg Throughput to a file.
   file << now.GetSeconds () << "\t" <<avg << std::endl;
-  std::cout << now.GetSeconds () << "s: \t" << " " << avg << " Mbit/s" << std::endl;
+  std::cout << now.GetSeconds () << "s: \t" << " " << avg << " Mbit/s" << " " << cur << std::endl;
   Simulator::Schedule (MilliSeconds (100), &CalculateThroughput);
 }
 
@@ -78,14 +82,15 @@ experiment (std::string rate)
 {
   double simulationTime = 10.0;
 
-  /* Setting threshold=2200 disables RTS-CTS */
-  Config::SetDefault ("ns3::WifiRemoteStationManager::RtsCtsThreshold", UintegerValue(100));
+  /* No fragmentation and no RTS/CTS */
+  Config::SetDefault ("ns3::WifiRemoteStationManager::FragmentationThreshold", StringValue ("999999"));
+  Config::SetDefault ("ns3::WifiRemoteStationManager::RtsCtsThreshold", StringValue ("999999"));
   NodeContainer p2pNodes;
   p2pNodes.Create (2);
 
   PointToPointHelper pointToPoint;
   pointToPoint.SetDeviceAttribute ("DataRate", StringValue ("100Mbps"));
-  pointToPoint.SetChannelAttribute ("Delay", StringValue ("2ms"));
+  pointToPoint.SetChannelAttribute ("Delay", StringValue ("1ms"));
 
   NetDeviceContainer p2pDevices;
   p2pDevices = pointToPoint.Install (p2pNodes);
@@ -161,10 +166,12 @@ experiment (std::string rate)
   p2pInterfaces = address.Assign (p2pDevices);
 
   address.SetBase ("10.1.3.0", "255.255.255.0");
-  address.Assign (apDevices);
+  Ipv4InterfaceContainer apInterface;
+  apInterface = address.Assign (apDevices);
   Ipv4InterfaceContainer staInterfaces;
   staInterfaces = address.Assign (staDevices);
 
+  /* Install Downlink Traffic */
   for(uint32_t i = 0; i< nWifi; i++)
   {
     BulkSendHelper source ("ns3::TcpSocketFactory",
@@ -180,6 +187,27 @@ experiment (std::string rate)
   sinkApps.Start (Seconds (0.0));
   sinkApps.Stop (Seconds (simulationTime));
 
+  /* Install TCP Receiver on the access point - Uplink Traffic*/
+ PacketSinkHelper sinkHelper ("ns3::TcpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), 8080));
+ ApplicationContainer sinkApp = sinkHelper.Install (p2pNodes.Get(0));
+ apSink = StaticCast<PacketSink> (sinkApp.Get (0));
+
+ /* Install TCP/UDP Transmitter on the station - Uplink Traffic*/
+ OnOffHelper server ("ns3::TcpSocketFactory", (InetSocketAddress (apInterface.GetAddress (0), 8080)));
+ server.SetAttribute ("PacketSize", UintegerValue (1472));
+ server.SetAttribute ("OnTime", StringValue ("ns3::ConstantRandomVariable[Constant=1]"));
+ server.SetAttribute ("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0]"));
+ server.SetAttribute ("DataRate", DataRateValue (DataRate ("10Kbps")));
+
+ for (uint32_t i = 0; i< nWifi; i++ )
+ {
+   ApplicationContainer serverApp = server.Install (wifiStaNodes.Get (i));
+   serverApp.Start (Seconds(1.0));
+ }
+
+ /* Start Applications */
+ sinkApp.Start (Seconds (0.0));
+
   Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
 
   Simulator::Schedule (MilliSeconds(100), CalculateThroughput);
@@ -191,10 +219,10 @@ experiment (std::string rate)
 
   for(uint32_t i = 0; i< nWifi; i++)
   {
-    sink1 = DynamicCast<PacketSink>(sinkApps.Get(i));
+    staSink = StaticCast<PacketSink>(sinkApps.Get(i));
     std::cout << rate <<" Node "<<i+1<<std::endl;
-    std::cout << "Total Bytes Received: " << sink1->GetTotalRx() << std::endl;
-    std::cout << "Average Throughput: " << ((sink1->GetTotalRx() * 8) / (1e6  * simulationTime)) << " Mbit/s" << std::endl;
+    std::cout << "Total Bytes Received: " << staSink->GetTotalRx() << std::endl;
+    std::cout << "Average Throughput: " << ((staSink->GetTotalRx() * 8) / (1e6  * simulationTime)) << " Mbit/s" << std::endl;
   }
   return 0;
 }
