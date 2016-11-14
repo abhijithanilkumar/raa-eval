@@ -43,7 +43,6 @@ NS_LOG_COMPONENT_DEFINE ("ThirdScriptExample");
 Ptr<PacketSink> apSink, staSink;
 const uint32_t nWifi = 30;
 uint64_t lastTotalRx[nWifi] = {};    /* The value of the last total received bytes */
-
 uint64_t lastTotalRxAp = 0;
 uint32_t MacTxDropCount, PhyTxDropCount, PhyRxDropCount;
 ApplicationContainer sinkApps;
@@ -201,6 +200,27 @@ experiment (std::string rate)
   sinkApps = sink.Install (wifiStaNodes);
   sinkApps.Start (Seconds (0.0));
   sinkApps.Stop (Seconds (simulationTime));
+
+  /* Install TCP Receiver on the access point - Uplink Traffic*/
+ PacketSinkHelper sinkHelper ("ns3::TcpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), 8080));
+ ApplicationContainer sinkApp = sinkHelper.Install (p2pNodes.Get(0));
+ apSink = StaticCast<PacketSink> (sinkApp.Get (0));
+
+ /* Install TCP/UDP Transmitter on the station - Uplink Traffic*/
+ OnOffHelper server ("ns3::TcpSocketFactory", (InetSocketAddress (apInterface.GetAddress (0), 8080)));
+ server.SetAttribute ("PacketSize", UintegerValue (1472));
+ server.SetAttribute ("OnTime", StringValue ("ns3::ConstantRandomVariable[Constant=1]"));
+ server.SetAttribute ("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0]"));
+ server.SetAttribute ("DataRate", DataRateValue (DataRate ("10Kbps")));
+
+ for (uint32_t i = 0; i< nWifi; i++ )
+ {
+   ApplicationContainer serverApp = server.Install (wifiStaNodes.Get (i));
+   serverApp.Start (Seconds(1.0));
+ }
+
+ /* Start Applications */
+ sinkApp.Start (Seconds (0.0));
 
   /* Install TCP Receiver on the access point - Uplink Traffic*/
  PacketSinkHelper sinkHelper ("ns3::TcpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), 8080));
