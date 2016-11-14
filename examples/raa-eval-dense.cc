@@ -24,6 +24,7 @@
 #include "ns3/csma-module.h"
 #include "ns3/internet-module.h"
 #include "ns3/dca-txop.h"
+#include "ns3/flow-monitor-module.h"
 #include <fstream>
 #include "ns3/gnuplot.h"
 using namespace std;
@@ -39,12 +40,11 @@ using namespace ns3;
 //                   point-to-point
 
 
-NS_LOG_COMPONENT_DEFINE ("ThirdScriptExample");
+NS_LOG_COMPONENT_DEFINE ("raa-eval-dense");
 Ptr<PacketSink> apSink, staSink;
 const uint32_t nWifi = 30;
 uint64_t lastTotalRx[nWifi] = {};    /* The value of the last total received bytes */
 uint64_t lastTotalRxAp = 0;
-uint32_t MacTxDropCount, PhyTxDropCount, PhyRxDropCount;
 ApplicationContainer sinkApps;
 std::fstream file;
 
@@ -72,8 +72,8 @@ CalculateThroughput ()
   lastTotalRxAp = apSink->GetTotalRx ();
 
   //Write the value of avg Throughput to a file.
-  file << now.GetSeconds () << "\t" <<avg << std::endl;
-  std::cout << now.GetSeconds () << "s: \t" << " " << avg << " Mbit/s" << " " << cur << std::endl;
+  file << now.GetSeconds () << "\t" << avg << "\t" << cur/nWifi << std::endl;
+  std::cout << now.GetSeconds () << "s: \t" << " " << avg << " Mbit/s" << " " << cur/nWifi << std::endl;
   Simulator::Schedule (MilliSeconds (100), &CalculateThroughput);
 }
 
@@ -152,7 +152,7 @@ experiment (std::string rate)
   NetDeviceContainer apDevices;
   apDevices = wifi.Install (phy, mac, wifiApNode);
 
-  Ptr<DcaTxop> dca[nWifi];
+  /*Ptr<DcaTxop> dca[nWifi];
 
   for (uint32_t i = 0; i < nWifi; ++i)
    {
@@ -165,7 +165,7 @@ experiment (std::string rate)
      mac->GetAttribute ("DcaTxop",ptr);
      dca[i] = ptr.Get<DcaTxop> ();
      NS_ASSERT (dca[i] != NULL);
-   }
+   }*/
 
 
   InternetStackHelper stack;
@@ -224,12 +224,14 @@ experiment (std::string rate)
 
   Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
 
-  Simulator::Schedule (MilliSeconds(100), CalculateThroughput);
+  FlowMonitorHelper flowmon;
+  Ptr<FlowMonitor> monitor = flowmon.InstallAll ();
+
+  Simulator::Schedule (Seconds(1.1), &CalculateThroughput);
 
   Simulator::Stop (Seconds (10.0));
   //phy.EnablePcapAll(rate);
   Simulator::Run ();
-  Simulator::Destroy ();
 
   for(uint32_t i = 0; i< nWifi; i++)
   {
@@ -239,12 +241,31 @@ experiment (std::string rate)
     std::cout << "Average Throughput: " << ((staSink->GetTotalRx() * 8) / (1e6  * simulationTime)) << " Mbit/s" << std::endl;
   }
 
+  monitor->CheckForLostPackets ();
+  Ptr<Ipv4FlowClassifier> classifier = DynamicCast<Ipv4FlowClassifier> (flowmon.GetClassifier ());
+  FlowMonitor::FlowStatsContainer stats = monitor->GetFlowStats ();
+  for (std::map<FlowId, FlowMonitor::FlowStats>::const_iterator i = stats.begin (); i != stats.end (); ++i)
+    {
+          Ipv4FlowClassifier::FiveTuple t = classifier->FindFlow (i->first);
+          std::cout << "Flow " << i->first << " (" << t.sourceAddress << " -> " << t.destinationAddress << ")\n";
+          std::cout << "  Tx Packets: " << i->second.txPackets << "\n";
+          std::cout << "  Tx Bytes:   " << i->second.txBytes << "\n";
+          std::cout << "  TxOffered:  " << i->second.txBytes * 8.0 / 9.0 / 1000 / 1000  << " Mbps\n";
+          std::cout << "  Rx Packets: " << i->second.rxPackets << "\n";
+          std::cout << "  Rx Bytes:   " << i->second.rxBytes << "\n";
+          std::cout << "  Throughput: " << i->second.rxBytes * 8.0 / 9.0 / 1000 / 1000  << " Mbps\n";
+    }
+
+  /* Counting Number of Collisions */
+  /*
   uint32_t coll = 0;
   for (uint32_t i = 0; i < nWifi; ++i)
   {
     coll = coll + dca[i]->m_collision;
   }
-  std::cout << "Collisions:   " << coll << std::endl;
+  std::cout << "Collisions:   " << coll << std::endl; */
+
+  Simulator::Destroy ();
   return 0;
 }
 
@@ -277,7 +298,7 @@ main (int argc, char *argv[])
     experiment(raas[i]);
     file.close();
   }*/
-  experiment(raas[0]);
+  experiment(raas[1]);
   //PlotGraph();
   return 0;
 }
