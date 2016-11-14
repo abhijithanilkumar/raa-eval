@@ -23,6 +23,7 @@
 #include "ns3/mobility-module.h"
 #include "ns3/csma-module.h"
 #include "ns3/internet-module.h"
+#include "ns3/dca-txop.h"
 #include <fstream>
 #include "ns3/gnuplot.h"
 using namespace std;
@@ -151,6 +152,20 @@ experiment (std::string rate)
   NetDeviceContainer apDevices;
   apDevices = wifi.Install (phy, mac, wifiApNode);
 
+  Ptr<DcaTxop> dca[nWifi];
+
+  for (uint32_t i = 0; i < nWifi; ++i)
+   {
+     Ptr<WifiNetDevice> dev = DynamicCast<WifiNetDevice> (wifiStaNodes.Get(i));
+     NS_ASSERT (dev != NULL);
+     PointerValue ptr;
+     dev->GetAttribute ("Mac",ptr);
+     Ptr<StaWifiMac> mac = ptr.Get<StaWifiMac> ();
+     NS_ASSERT (mac != NULL);
+     mac->GetAttribute ("DcaTxop",ptr);
+     dca[i] = ptr.Get<DcaTxop> ();
+     NS_ASSERT (dca[i] != NULL);
+   }
 
 
   InternetStackHelper stack;
@@ -223,6 +238,13 @@ experiment (std::string rate)
     std::cout << "Total Bytes Received: " << staSink->GetTotalRx() << std::endl;
     std::cout << "Average Throughput: " << ((staSink->GetTotalRx() * 8) / (1e6  * simulationTime)) << " Mbit/s" << std::endl;
   }
+
+  uint32_t coll = 0;
+  for (uint32_t i = 0; i < nWifi; ++i)
+  {
+    coll = coll + dca[i]->m_collision;
+  }
+  std::cout << "Collisions:   " << coll << std::endl;
   return 0;
 }
 
