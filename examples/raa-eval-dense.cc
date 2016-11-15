@@ -80,7 +80,7 @@ CalculateThroughput ()
 int
 experiment (std::string rate)
 {
-  double simulationTime = 10.0;
+  double simulationTime = 100.0;
 
   /* No fragmentation and no RTS/CTS */
   Config::SetDefault ("ns3::WifiRemoteStationManager::FragmentationThreshold", StringValue ("999999"));
@@ -222,27 +222,6 @@ experiment (std::string rate)
  /* Start Applications */
  sinkApp.Start (Seconds (0.0));
 
-  /* Install TCP Receiver on the access point - Uplink Traffic*/
- PacketSinkHelper sinkHelper ("ns3::TcpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), 8080));
- ApplicationContainer sinkApp = sinkHelper.Install (p2pNodes.Get(0));
- apSink = StaticCast<PacketSink> (sinkApp.Get (0));
-
- /* Install TCP/UDP Transmitter on the station - Uplink Traffic*/
- OnOffHelper server ("ns3::TcpSocketFactory", (InetSocketAddress (apInterface.GetAddress (0), 8080)));
- server.SetAttribute ("PacketSize", UintegerValue (1472));
- server.SetAttribute ("OnTime", StringValue ("ns3::ConstantRandomVariable[Constant=1]"));
- server.SetAttribute ("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0]"));
- server.SetAttribute ("DataRate", DataRateValue (DataRate ("10Kbps")));
-
- for (uint32_t i = 0; i< nWifi; i++ )
- {
-   ApplicationContainer serverApp = server.Install (wifiStaNodes.Get (i));
-   serverApp.Start (Seconds(1.0));
- }
-
- /* Start Applications */
- sinkApp.Start (Seconds (0.0));
-
   Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
 
   FlowMonitorHelper flowmon;
@@ -303,15 +282,15 @@ main (int argc, char *argv[])
   /* ... */
   string raas[] = {"ns3::ArfWifiManager",
                    "ns3::AarfWifiManager",
-                   "ns3::AarfcdWifiManager",
-                   "ns3::AmrrWifiManager",
-                   "ns3::CaraWifiManager",
-                   "ns3::IdealWifiManager",
-                   "ns3::MinstrelWifiManager",
-                   "ns3::ParfWifiManager",
-                   "ns3::AparfWifiManager",
-                   "ns3::OnoeWifiManager",
-                   "ns3::RraaWifiManager"};
+                   //"ns3::AarfcdWifiManager",
+                   //"ns3::AmrrWifiManager",
+                   //"ns3::CaraWifiManager",
+                   //"ns3::IdealWifiManager",
+                   "ns3::MinstrelWifiManager"};
+                   //"ns3::ParfWifiManager",
+                   //"ns3::AparfWifiManager",
+                   //"ns3::OnoeWifiManager",
+                   //"ns3::RraaWifiManager"};
     file.open ("./raa-eval-plots/" + raas[index] + " Average Throughput.txt", std::fstream::out);
     experiment(raas[index]);
 
