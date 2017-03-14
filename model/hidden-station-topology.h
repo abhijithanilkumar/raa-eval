@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2016 NITK Surathkal
+ * Copyright (c) 2017 NITK Surathkal
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -20,8 +20,8 @@
 
 // Implement an object to create a hidden station topology in raa-eval.
 
-#ifndef HIDDENSTN_TOPOLOGY_H
-#define HIDDENSTN_TOPOLOGY_H
+#ifndef HIDDEN_STATION_TOPOLOGY_H
+#define HIDDEN_STATION_TOPOLOGY_H
 
 #include "configure-topology.h"
 #include "traffic-parameters.h"
@@ -32,7 +32,7 @@ namespace ns3 {
 /*
  * \brief Configures hidden station topology and simulates the traffic accordingly.
  */
-class HiddenstnTopology : public ConfigureTopology
+class HiddenStationTopology : public ConfigureTopology
 {
 public:
   /**
@@ -44,12 +44,12 @@ public:
   /**
    * \brief Constructor
    */
-  HiddenstnTopology (void);
+  HiddenStationTopology (void);
 
   /**
    * \brief Destructor
    */
-  ~HiddenstnTopology (void);
+  ~HiddenStationTopology (void);
 
   /**
    * \brief Invokes methods for creating a hidden station topology and simulating traffic
@@ -62,10 +62,10 @@ public:
    *                          traffic related parameters.
    * \param fileName The name of the file whtere stats are to be dumped.
    */
-  void CreateHiddenstnTopology (Ptr <TrafficParameters> traffic, std::string fileName);
+  void CreateHiddenStationTopology (Ptr <TrafficParameters> traffic, std::string fileName);
 
 };
 
 }
 
-#endif /* HIDDENSTN_TOPOLOGY_H */
+#endif /* HIDDEN_STATION_TOPOLOGY_H */

@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2016 NITK Surathkal
+ * Copyright (c) 2017 NITK Surathkal
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -24,18 +24,18 @@
 #include <cstdlib>
 #include <string>
 
-#include "hiddenstn-topology.h"
+#include "hidden-station-topology.h"
 
 namespace ns3 {
 
-NS_LOG_COMPONENT_DEFINE ("3 Node Hidden Station Topology");
+NS_LOG_COMPONENT_DEFINE ("HiddenStationTopology");
 
-NS_OBJECT_ENSURE_REGISTERED (HiddenstnTopology);
+NS_OBJECT_ENSURE_REGISTERED (HiddenStationTopology);
 
 TypeId
-HiddenstnTopology::GetTypeId (void)
+HiddenStationTopology::GetTypeId (void)
 {
-  static TypeId tid = TypeId ("ns3::HiddenstnTopology")
+  static TypeId tid = TypeId ("ns3::HiddenStationTopology")
     .setParent<ConfigureTopology> ()
     .setGroupName ("RaaEvaluationSuite")
   ;
