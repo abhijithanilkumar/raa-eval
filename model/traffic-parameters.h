@@ -88,3 +88,5 @@ private:
 };
 
 }
+
+#endif /* TRAFFIC_PARAMETERS_H */
