@@ -164,7 +164,7 @@ protected:
   double m_energyDetectionThreshold;
   double m_ccaMode1Threshold;
   double m_txPowerStart;
-  double m_TxPowerEnd;
+  double m_txPowerEnd;
   uint32_t m_channelNumber;
   double m_rxGain;
 }
