@@ -69,6 +69,20 @@ public:
   bool IsRtsCtsUsed (void) const;
 
   /**
+   * \brief Set whether both Uplink and Downlink are active
+   *
+   * \param useRtsCts True if both Uplink and Downlink are active
+   */
+  void SetUplinkDownlink (bool useUplinkDownlink);
+
+  /**
+   * \brief Check whether both Uplink and Downlink are active
+   *
+   * \return True if both Uplink and Downlink are active
+   */
+  bool IsUplinkDownlink (void) const;
+
+  /**
    * \brief Set the simulation time in seconds
    *
    * \param simulationTime Time when the simulation should stop
@@ -85,6 +99,7 @@ public:
 private:
   bool m_useRtsCts;
   Time m_simulationTime;
+  bool m_uplinkDownlink;
 };
 
 }
