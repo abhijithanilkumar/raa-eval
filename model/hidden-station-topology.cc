@@ -42,4 +42,9 @@ HiddenStationTopology::GetTypeId (void)
   return tid;
 }
 
+void
+CreateHiddenStationTopology (Ptr<TrafficParameters> traffic, std::string fileName)
+{
+  SetTopologyParameters (traffic);
+}
 }

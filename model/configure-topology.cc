@@ -36,6 +36,36 @@ ConfigureTopology::GetTypeId (void)
   static TypeId tid = TypeId ("ns3::ConfigureTopology")
     .setParent<Object> ()
     .setGroupName ("RaaEvaluationSuite")
+    .AddAttribute ("EnergyDetectionThreshold",
+                   "Enegy Detection Threshold in dbm",
+                   DoubleValue(-95.0),
+                   MakeDoubleAccessor (&ConfigureTopology::m_energyDetectionThreshold),
+                   MakeDoubleChecker<double> (0))
+    .AddAttribute ("CcaMode1Threshold",
+                   "CcaMode1Threshold in dbm",
+                   DoubleValue(-95.0),
+                   MakeDoubleAccessor (&ConfigureTopology::m_ccaMode1Threshold),
+                   MakeDoubleChecker<double> (0))
+    .AddAttribute ("TxPowerStart",
+                   "Minimum Available Transmission Level in dbm",
+                   DoubleValue(23.0),
+                   MakeDoubleAccessor (&ConfigureTopology::m_txPowerStart),
+                   MakeDoubleChecker<double> (0))
+    .AddAttribute ("TxPowerEnd",
+                   "Maximum Available Transmission Level in dbm",
+                   DoubleValue(23.0),
+                   MakeDoubleAccessor (&ConfigureTopology::m_txPowerEnd),
+                   MakeDoubleChecker<double> (0))
+    .AddAttribute ("ChannelNumber",
+                   "Channel Number to control Frequency and ChannelWidth",
+                   UintegerValue(1),
+                   MakeUintegerAccessor (&ConfigureTopology::m_channelNumber),
+                   MakeUintegerChecker<uint32_t> ())
+    .AddAttribute ("RxGain",
+                   "Reception Gain in dB",
+                   DoubleValue(-25.0),
+                   MakeDoubleAccessor (&ConfigureTopology::m_rxGain),
+                   MakeUintegerChecker<double> (0))
   ;
   return tid;
 }
@@ -51,6 +81,8 @@ ConfigureTopology::~ConfigureTopology (void)
 void
 ConfigureTopology::SetTopologyParameters (Ptr<TrafficParameters> traffic)
 {
+  useRtsCts = traffc->IsRtsCtsUsed ();
+  m_rtsCtsThreshold = (useRtsCts ? UintegerValue (10) : UintegerValue (22000));
 }
 
 void
