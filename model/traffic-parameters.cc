@@ -46,6 +46,10 @@ TrafficParameters::GetTypeId (void)
                    TimeValue (Seconds (10)),
                    MakeTimeAccessor (&TrafficParameters::m_simulationTime),
                    MakeTimeChecker ())
+    .AddAttribute ("UplinkDownlink", "Use both Uplink and Downlink",
+                   BooleanValue (false),
+                   MakeBooleanAccessor (&TrafficParameters::m_uplinkDownlink)
+                   MakeBooleanChecker ())
   ;
   return tid;
 }
@@ -71,10 +75,22 @@ TrafficParameters::IsRtsCtsUsed (void) const
 }
 
 void
+TrafficParameters::SetUplinkDownlink (bool useUplinkDownlink)
+{
+  m_uplinkDownlink = useUplinkDownlink;
+}
+
+bool
+TrafficParameters::IsUplinkDownlink (void) const
+{
+  return m_uplinkDownlink;
+}
+
+void
 TrafficParameters::SetSimulationTime (Time simulationTime)
 {
   m_simulationTime = simulationTime;
-  
+
 }
 Time
 TrafficParameters::GetSimulationTime (void) const
