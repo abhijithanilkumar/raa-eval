@@ -15,8 +15,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- * Authors: S Giritheja  <s.giritheja@gmail.com>
- *          Mohit P. Tahiliani <tahiliani@nitk.edu.in>
+ * Authors: Mohit P. Tahiliani <tahiliani@nitk.edu.in>
+ *          S Giritheja <s.giritheja@gmail.com>
  */
 
 // Define an object that collects statistics for RAA eval suite.
