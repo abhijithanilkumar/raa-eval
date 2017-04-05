@@ -58,14 +58,13 @@ CreateHiddenStationTopology (Ptr<TrafficParameters> traffic, std::string fileNam
   //Set Topology Parameters
   SetTopologyParameters (traffic);
 
-  /*m_apNumber = 2;
-  m_nodes = 2;
-  m_radius = 60;*/
+  apNumber = 2;
+  staNumber = 2;
+  /*m_radius = 60;*/
 
   //Create Nodes
-  NodeContainer apNodes, staNodes;
-  apNodes.Create (2);
-  staNodes.Create (2);
+  NodeContainer nodes;
+  nodes.Create (apNumber+staNumber);
 
   //Set RTS-CTS Threshold
   Config::SetDefault ("ns3::WifiRemoteStationManager::RtsCtsThreshold", traffic->GetRtsCtsThreshold ());
@@ -76,14 +75,24 @@ CreateHiddenStationTopology (Ptr<TrafficParameters> traffic, std::string fileNam
   Ptr<ListPositionAllocator> staPosAlloc = CreateObject<ListPositionAllocator> ();
   mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
   mobility.SetMobilityModel ("ns3::ConstantVelocityMobilityModel");
-  apPosAlloc->Add (Vector (0, 0, 1));
-  apPosAlloc->Add (Vector (160, 0, 1));
+  for (size_t i=0; i<apNumber; ++i)
+  {
+    apPosAlloc->Add (Vector ((160*i), 0, 1));
+  }
   mobility.SetPositionAllocator (apPosAlloc);
-  mobility.Install (apNodes);
-  staPosAlloc->Add (80, 0, 1);
-  staPosAlloc->Add (80, 0, 1);
+  for (size_t i=0; i<apNumber; ++i)
+  {
+    mobility.Install (nodes.Get (i));
+  }
+  for (size_t i=0; i<staNumber; ++i)
+  {
+    staPosAlloc->Add (Vector (80, 0, 1));
+  }
   mobility.SetPositionAllocator (staPosAlloc);
-  mobility.Install (staNodes);
+  for (size_t i=0; i<staNumber; ++i)
+  {
+    mobility.Install (nodes.Get (apNumber+i));
+  }
 
   //Install Wifi Channel, Wifi Physical Layer and Mac Layer
   WifiHelper wifi;
@@ -107,27 +116,104 @@ CreateHiddenStationTopology (Ptr<TrafficParameters> traffic, std::string fileNam
   wifiPhy.Set ("RxGain", DoubleValue (m_rxGain));
 
   //Install the Wifi Devices
-  WifiMacHelper wifiMac;
-  wifiMac.SetType ("ns3::StaWifiMac",
-               "Ssid", SsidValue (ssid),
-               "ActiveProbing", BooleanValue (false));
-  NetDeviceContainer staDevices;
-  staDevices = wifi.Install (wifiPhy, wifiMac, staNodes);
-  mac.SetType ("ns3::ApWifiMac",
-               "Ssid", SsidValue (ssid));
-  NetDeviceContainer apDevices;
-  apDevices = wifi.Install (wifiPhy, wifiMac, apNodes);
+  NqosWifiMacHelper wifiMac;
+  NetDeviceContainer devices;
+  wifiMac.SetType ("ns3::AdhocWifiMac"); // use ad-hoc MAC
+  devices = wifi.Install (wifiPhy, wifiMac, nodes);
 
   //Assign IP Addresses
   InternetStackHelper stack;
-  stack.Install (staNodes);
-  stack.Install (apNodes);
+  stack.Install (nodes)
 
   Ipv4AddressHelper address;
   address.SetBase ("10.0.0.0", "255.0.0.0");
-  address.assign (staDevices);
-  address.assign (apDevices);
+  address.assign (devices);
 
+  /*
+  //Install Application
+  uint16_t cbrPort = 12345;
+  uint16_t  echoPort = 9;
+  //uint16_t sinkPort = 5555;
+  for(size_t j=1; j<=m_apNumber; ++j){
+    for(size_t i=m_apNumber+m_nodeNumber/m_apNumber*(j-1);
+        i<m_apNumber+m_nodeNumber/m_apNumber*j ; ++i){
+      std::string s;
+      std::stringstream ss(s);
+      //std::cout << m_downlinkUplink << "-----------------------";
+      if(m_downlinkUplink){
+
+         ss << i+1;
+      }else
+      {
+        ss << j;
+      }
+      s = "10.0.0."+ss.str();
+      OnOffHelper onOffHelper ("ns3::TcpSocketFactory",
+               InetSocketAddress (Ipv4Address (s.c_str()), cbrPort));
+      onOffHelper.SetAttribute ("PacketSize", UintegerValue (in_packetSize));
+//onOffHelper.SetAttribute ("OnTime",  StringValue ("ns3::ConstantRandomVariable[Constant=1]"));
+//onOffHelper.SetAttribute ("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0]"));
+      std::string s2;
+      std::stringstream ss2(s2);
+
+      PacketSinkHelper sink ("ns3::TcpSocketFactory",
+                        InetSocketAddress (Ipv4Address(s.c_str()),  cbrPort));
+      sinkApps = sink.Install (m_nodes);
+      sinkApps.Start (Seconds (0.00));
+      sinkApps.Stop (Seconds (simulationTime));
+
+      if(m_downlinkUplink){
+        ss2 << in_dataRate+i*100;
+      }else
+      {
+        ss2 << in_dataRate+i*100;
+      }
+      s2 = ss2.str() + "bps";
+      onOffHelper.SetAttribute ("DataRate", StringValue (s2));
+      //onOffHelper.SetAttribute ("MaxBytes", UintegerValue (100000));
+      if(m_downlinkUplink){
+        onOffHelper.SetAttribute ("StartTime", TimeValue (Seconds (1.00+static_cast<double>(i)/100)));
+        onOffHelper.SetAttribute ("StopTime", TimeValue (Seconds (50.000+static_cast<double>(i)/100)));
+        m_cbrApps.Add (onOffHelper.Install (m_nodes.Get (j-1)));
+      }else
+      {
+        onOffHelper.SetAttribute ("StartTime", TimeValue (Seconds (1.00)));
+        onOffHelper.SetAttribute ("StopTime", TimeValue (Seconds (50.000+static_cast<double>(j)/100)));
+        m_cbrApps.Add (onOffHelper.Install (m_nodes.Get (i)));
+      }
+    }
+  }
+
+  //again using different start times to workaround Bug 388 and Bug 912
+  for(size_t j=1; j<=m_apNumber; ++j){
+    for(size_t i=m_apNumber+m_nodeNumber/m_apNumber*(j-1);
+        i<m_apNumber+m_nodeNumber/m_apNumber*j ; ++i){
+      std::string s;
+      std::stringstream ss(s);
+      if(m_downlinkUplink){
+         ss << i+1;
+      }else
+      {
+        ss << j;
+      }
+      s = "10.0.0."+ss.str();
+      UdpEchoClientHelper echoClientHelper (Ipv4Address (s.c_str()), echoPort);
+      echoClientHelper.SetAttribute ("MaxPackets", UintegerValue (1));
+      echoClientHelper.SetAttribute ("Interval", TimeValue (Seconds (0.1)));
+      echoClientHelper.SetAttribute ("PacketSize", UintegerValue (10));
+      if(m_downlinkUplink){
+        echoClientHelper.SetAttribute ("StartTime", TimeValue (Seconds (0.001)));
+        echoClientHelper.SetAttribute ("StopTime", TimeValue (Seconds (50.001)));
+        m_pingApps.Add (echoClientHelper.Install (m_nodes.Get (j-1)));
+      }else
+      {
+        echoClientHelper.SetAttribute ("StartTime", TimeValue (Seconds (0.001)));
+        echoClientHelper.SetAttribute ("StopTime", TimeValue (Seconds (50.001)));
+        m_pingApps.Add (echoClientHelper.Install (m_nodes.Get (i)));
+      }
+    }
+  }
+  */
 
 }
 }
