@@ -129,19 +129,21 @@ CreateHiddenStationTopology (Ptr<TrafficParameters> traffic, std::string fileNam
   address.SetBase ("10.0.0.0", "255.0.0.0");
   address.assign (devices);
 
-  /*
+
   //Install Application
   uint16_t cbrPort = 12345;
   uint16_t  echoPort = 9;
-  //uint16_t sinkPort = 5555;
-  for(size_t j=1; j<=m_apNumber; ++j){
-    for(size_t i=m_apNumber+m_nodeNumber/m_apNumber*(j-1);
-        i<m_apNumber+m_nodeNumber/m_apNumber*j ; ++i){
+  ApplicationContainer cbrApps;
+  ApplicationContainer pingApps;
+  for(size_t j=1; j<=apNumber; ++j)
+  {
+    for(size_t i=apNumber+staNumber/apNumber*(j-1);
+        i<apNumber+staNumber/apNumber*j ; ++i)
+    {
       std::string s;
       std::stringstream ss(s);
-      //std::cout << m_downlinkUplink << "-----------------------";
-      if(m_downlinkUplink){
-
+      if(traffic->IsUplinkDownlink ())
+      {
          ss << i+1;
       }else
       {
@@ -150,49 +152,52 @@ CreateHiddenStationTopology (Ptr<TrafficParameters> traffic, std::string fileNam
       s = "10.0.0."+ss.str();
       OnOffHelper onOffHelper ("ns3::TcpSocketFactory",
                InetSocketAddress (Ipv4Address (s.c_str()), cbrPort));
-      onOffHelper.SetAttribute ("PacketSize", UintegerValue (in_packetSize));
-//onOffHelper.SetAttribute ("OnTime",  StringValue ("ns3::ConstantRandomVariable[Constant=1]"));
-//onOffHelper.SetAttribute ("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0]"));
+      onOffHelper.SetAttribute ("PacketSize", UintegerValue (1024));
       std::string s2;
       std::stringstream ss2(s2);
 
       PacketSinkHelper sink ("ns3::TcpSocketFactory",
                         InetSocketAddress (Ipv4Address(s.c_str()),  cbrPort));
-      sinkApps = sink.Install (m_nodes);
+      sinkApps = sink.Install (nodes);
       sinkApps.Start (Seconds (0.00));
-      sinkApps.Stop (Seconds (simulationTime));
+      sinkApps.Stop (Seconds (traffic->GetSimulationTime ()));
 
-      if(m_downlinkUplink){
-        ss2 << in_dataRate+i*100;
+      if(traffic->IsUplinkDownlink ())
+      {
+        ss2 << 5500000+i*100;
       }else
       {
-        ss2 << in_dataRate+i*100;
+        ss2 << 5500000+i*100;
       }
       s2 = ss2.str() + "bps";
       onOffHelper.SetAttribute ("DataRate", StringValue (s2));
-      //onOffHelper.SetAttribute ("MaxBytes", UintegerValue (100000));
-      if(m_downlinkUplink){
+      if(traffic->IsUplinkDownlink ())
+      {
         onOffHelper.SetAttribute ("StartTime", TimeValue (Seconds (1.00+static_cast<double>(i)/100)));
         onOffHelper.SetAttribute ("StopTime", TimeValue (Seconds (50.000+static_cast<double>(i)/100)));
-        m_cbrApps.Add (onOffHelper.Install (m_nodes.Get (j-1)));
-      }else
+        cbrApps.Add (onOffHelper.Install (nodes.Get (j-1)));
+      }
+      else
       {
         onOffHelper.SetAttribute ("StartTime", TimeValue (Seconds (1.00)));
         onOffHelper.SetAttribute ("StopTime", TimeValue (Seconds (50.000+static_cast<double>(j)/100)));
-        m_cbrApps.Add (onOffHelper.Install (m_nodes.Get (i)));
+        cbrApps.Add (onOffHelper.Install (nodes.Get (i)));
       }
     }
   }
 
   //again using different start times to workaround Bug 388 and Bug 912
-  for(size_t j=1; j<=m_apNumber; ++j){
-    for(size_t i=m_apNumber+m_nodeNumber/m_apNumber*(j-1);
-        i<m_apNumber+m_nodeNumber/m_apNumber*j ; ++i){
+  for(size_t j=1; j<=apNumber; ++j)
+  {
+    for(size_t i=apNumber+staNumber/apNumber*(j-1);
+        i<apNumber+staNumber/apNumber*j ; ++i){
       std::string s;
       std::stringstream ss(s);
-      if(m_downlinkUplink){
+      if(traffic->IsUplinkDownlink ())
+      {
          ss << i+1;
-      }else
+      }
+      else
       {
         ss << j;
       }
@@ -201,19 +206,19 @@ CreateHiddenStationTopology (Ptr<TrafficParameters> traffic, std::string fileNam
       echoClientHelper.SetAttribute ("MaxPackets", UintegerValue (1));
       echoClientHelper.SetAttribute ("Interval", TimeValue (Seconds (0.1)));
       echoClientHelper.SetAttribute ("PacketSize", UintegerValue (10));
-      if(m_downlinkUplink){
-        echoClientHelper.SetAttribute ("StartTime", TimeValue (Seconds (0.001)));
-        echoClientHelper.SetAttribute ("StopTime", TimeValue (Seconds (50.001)));
-        m_pingApps.Add (echoClientHelper.Install (m_nodes.Get (j-1)));
-      }else
+      if(traffic->IsUplinkDownlink ())
       {
         echoClientHelper.SetAttribute ("StartTime", TimeValue (Seconds (0.001)));
         echoClientHelper.SetAttribute ("StopTime", TimeValue (Seconds (50.001)));
-        m_pingApps.Add (echoClientHelper.Install (m_nodes.Get (i)));
+        pingApps.Add (echoClientHelper.Install (nodes.Get (j-1)));
+      }
+      else
+      {
+        echoClientHelper.SetAttribute ("StartTime", TimeValue (Seconds (0.001)));
+        echoClientHelper.SetAttribute ("StopTime", TimeValue (Seconds (50.001)));
+        pingApps.Add (echoClientHelper.Install (nodes.Get (i)));
       }
     }
   }
-  */
-
 }
 }
