@@ -16,13 +16,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * Authors: Abhijith Anilkumar <abhijithabhayam@gmail.com>
+ *          Mohit P. Tahiliani <tahiliani@nitk.edu.in>
  */
 
 // Implement an object to configure topology in raa-eval.
 
 #include "configure-topology.h"
 #include "ns3/log.h"
-#include "ns3/core-module.h"
 
 namespace ns3{
 
@@ -34,8 +34,8 @@ TypeId
 ConfigureTopology::GetTypeId (void)
 {
   static TypeId tid = TypeId ("ns3::ConfigureTopology")
-    .setParent<Object> ()
-    .setGroupName ("RaaEvaluationSuite")
+    .SetParent<Object> ()
+    .SetGroupName ("RaaEvaluationSuite")
     .AddAttribute ("EnergyDetectionThreshold",
                    "Enegy Detection Threshold in dbm",
                    DoubleValue(-95.0),
@@ -65,7 +65,7 @@ ConfigureTopology::GetTypeId (void)
                    "Reception Gain in dB",
                    DoubleValue(-25.0),
                    MakeDoubleAccessor (&ConfigureTopology::m_rxGain),
-                   MakeUintegerChecker<double> (0))
+                   MakeDoubleChecker<double> (0))
   ;
   return tid;
 }
@@ -78,12 +78,12 @@ ConfigureTopology::~ConfigureTopology (void)
 {
 }
 
-void
+/*void
 ConfigureTopology::SetTopologyParameters (Ptr<TrafficParameters> traffic)
 {
   useRtsCts = traffc->IsRtsCtsUsed ();
   m_rtsCtsThreshold = (useRtsCts ? UintegerValue (10) : UintegerValue (22000));
-}
+}*/
 
 void
 ConfigureTopology::SetRtsCtsThreshold (uint32_t rtsCtsThreshold)

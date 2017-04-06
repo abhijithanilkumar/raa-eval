@@ -16,6 +16,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * Authors: Abhijith Anilkumar <abhijithabhayam@gmail.com>
+ *          Mohit P. Tahiliani <tahiliani@nitk.edu.in>
  */
 
 // Implement an object to create a hidden station topology in raa-eval.
@@ -26,7 +27,6 @@
 #include <vector>
 
 #include "hidden-station-topology.h"
-#include "eval-stats.h"
 #include "ns3/core-module.h"
 #include "ns3/propagation-module.h"
 #include "ns3/network-module.h"
@@ -46,8 +46,8 @@ TypeId
 HiddenStationTopology::GetTypeId (void)
 {
   static TypeId tid = TypeId ("ns3::HiddenStationTopology")
-    .setParent<ConfigureTopology> ()
-    .setGroupName ("RaaEvaluationSuite")
+    .SetParent<ConfigureTopology> ()
+    .SetGroupName ("RaaEvaluationSuite")
   ;
   return tid;
 }
@@ -123,11 +123,11 @@ CreateHiddenStationTopology (Ptr<TrafficParameters> traffic, std::string fileNam
 
   //Assign IP Addresses
   InternetStackHelper stack;
-  stack.Install (nodes)
+  stack.Install (nodes);
 
   Ipv4AddressHelper address;
   address.SetBase ("10.0.0.0", "255.0.0.0");
-  address.assign (devices);
+  address.Assign (devices);
 
 
   //Install Application
@@ -135,6 +135,7 @@ CreateHiddenStationTopology (Ptr<TrafficParameters> traffic, std::string fileNam
   uint16_t  echoPort = 9;
   ApplicationContainer cbrApps;
   ApplicationContainer pingApps;
+  ApplicationContainer sinkApps;
   for(size_t j=1; j<=apNumber; ++j)
   {
     for(size_t i=apNumber+staNumber/apNumber*(j-1);
@@ -220,5 +221,9 @@ CreateHiddenStationTopology (Ptr<TrafficParameters> traffic, std::string fileNam
       }
     }
   }
+
+  Simulator::Stop (Time::FromDouble (((traffic->GetSimulationTime ()).ToDouble (Time::S) + 5), Time::S));
+  Simulator::Run ();
+  Simulator::Destroy ();
 }
 }

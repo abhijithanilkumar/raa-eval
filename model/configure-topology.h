@@ -16,6 +16,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * Authors: Abhijith Anilkumar <abhijithabhayam@gmail.com>
+ *          Mohit P. Tahiliani <tahiliani@nitk.edu.in>
  */
 
 // Define an object to configure the topology in raa-eval.
@@ -23,7 +24,13 @@
 #ifndef CONFIGURE_TOPOLOGY_H
 #define CONFIGURE_TOPOLOGY_H
 
+#include <stdint.h>
+
 #include "ns3/object.h"
+#include "ns3/ptr.h"
+#include "ns3/node.h"
+#include "ns3/core-module.h"
+#include "ns3/traffic-parameters.h"
 
 namespace ns3 {
 
@@ -58,7 +65,7 @@ public:
    *
    * \param traffic Object of TrafficParameters class that contains the traffic information
    */
-  void SetTopologyParameters (Ptr<TrafficParameters> traffic);
+  //void SetTopologyParameters (Ptr<TrafficParameters> traffic);
 
   /**
    * \brief Set the RTS-CTS Threshold
@@ -135,7 +142,7 @@ public:
    *
    * \param channelNumber the Wifi channel number
    */
-  void SetChannelNumber (unit32_t channelNumber);
+  void SetChannelNumber (uint32_t channelNumber);
 
   /**
    * \brief Get the channel number used
@@ -157,7 +164,6 @@ public:
    * \return the reception gain of the Wifi channel
    */
   double GetRxGain (void) const;
-};
 
 protected:
   uint32_t m_rtsCtsThreshold;
@@ -167,6 +173,8 @@ protected:
   double m_txPowerEnd;
   uint32_t m_channelNumber;
   double m_rxGain;
+};
+
 }
 
 #endif /* CONFIGURE_TOPOLOGY_H */

@@ -16,6 +16,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * Authors: Abhijith Anilkumar <abhijithabhayam@gmail.com>
+ *          Mohit P. Tahiliani <tahiliani@nitk.edu.in>
  */
 
 // Implement an object to set traffic parameters in raa-eval.
@@ -36,8 +37,8 @@ TypeId
 TrafficParameters::GetTypeId (void)
 {
   static TypeId tid = TypeId ("ns3::TrafficParameters")
-    .setParent<Object> ()
-    .setGroupName ("RaaEvaluationSuite")
+    .SetParent<Object> ()
+    .SetGroupName ("RaaEvaluationSuite")
     .AddAttribute ("UseRtsCts", "Enable or Disable RTS/CTS in stations",
                    BooleanValue (false),
                    MakeBooleanAccessor (&TrafficParameters::m_useRtsCts),

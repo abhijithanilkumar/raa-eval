@@ -16,6 +16,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * Authors: Abhijith Anilkumar <abhijithabhayam@gmail.com>
+ *          Mohit P. Tahiliani <tahiliani@nitk.edu.in>
  */
 
 // Implement an object to create a hidden station topology in raa-eval.
@@ -25,7 +26,6 @@
 
 #include "configure-topology.h"
 #include "traffic-parameters.h"
-#include "create-traffic.h"
 
 namespace ns3 {
 

@@ -16,6 +16,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * Authors: Abhijith Anilkumar <abhijithabhayam@gmail.com>
+ *          Mohit P. Tahiliani <tahiliani@nitk.edu.in>
  */
 
 //Implement an object to set traffic parameters in raa-eval
@@ -23,6 +24,7 @@
 #ifdef TRAFFIC_PARAMETERS_H
 #define TRAFFIC_PARAMETERS_H
 
+#include <stdint.h>
 #include "ns3/object.h"
 #include "ns3/core-module.h"
 
