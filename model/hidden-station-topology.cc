@@ -52,8 +52,16 @@ HiddenStationTopology::GetTypeId (void)
   return tid;
 }
 
+HiddenStationTopology::HiddenStationTopology (void)
+{
+}
+
+HiddenStationTopology::~HiddenStationTopology (void)
+{
+}
+
 void
-CreateHiddenStationTopology (Ptr<TrafficParameters> traffic, std::string fileName)
+HiddenStationTopology::CreateHiddenStationTopology (Ptr<TrafficParameters> traffic, std::string fileName)
 {
   //Set Topology Parameters
   SetTopologyParameters (traffic);
@@ -67,7 +75,7 @@ CreateHiddenStationTopology (Ptr<TrafficParameters> traffic, std::string fileNam
   nodes.Create (apNumber+staNumber);
 
   //Set RTS-CTS Threshold
-  Config::SetDefault ("ns3::WifiRemoteStationManager::RtsCtsThreshold", GetRtsCtsThreshold ());
+  Config::SetDefault ("ns3::WifiRemoteStationManager::RtsCtsThreshold", UintegerValue(GetRtsCtsThreshold ()));
 
   //Create Mobility Model
   MobilityHelper mobility;
@@ -98,7 +106,6 @@ CreateHiddenStationTopology (Ptr<TrafficParameters> traffic, std::string fileNam
   WifiHelper wifi;
   YansWifiChannelHelper wifiChannel;
   YansWifiPhyHelper wifiPhy;
-  Ssid ssid = Ssid ("ns-3-ssid");
   wifi.SetStandard (WIFI_PHY_STANDARD_80211b);
   wifi.SetRemoteStationManager ("ns3::ConstantRateWifiManager",
                               "DataMode", StringValue ("DsssRate11Mbps"),
