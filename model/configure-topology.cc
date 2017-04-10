@@ -78,12 +78,12 @@ ConfigureTopology::~ConfigureTopology (void)
 {
 }
 
-/*void
+void
 ConfigureTopology::SetTopologyParameters (Ptr<TrafficParameters> traffic)
 {
-  useRtsCts = traffc->IsRtsCtsUsed ();
-  m_rtsCtsThreshold = (useRtsCts ? UintegerValue (10) : UintegerValue (22000));
-}*/
+  bool useRtsCts = traffic->IsRtsCtsUsed ();
+  m_rtsCtsThreshold = (useRtsCts ? 10 : 22000);
+}
 
 void
 ConfigureTopology::SetRtsCtsThreshold (uint32_t rtsCtsThreshold)

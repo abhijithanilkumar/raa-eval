@@ -21,8 +21,6 @@
 
 // Implement an object to set traffic parameters in raa-eval.
 
-#include <iostream>
-
 #include "traffic-parameters.h"
 #include "ns3/log.h"
 #include "ns3/core-module.h"
@@ -49,7 +47,7 @@ TrafficParameters::GetTypeId (void)
                    MakeTimeChecker ())
     .AddAttribute ("UplinkDownlink", "Use both Uplink and Downlink",
                    BooleanValue (false),
-                   MakeBooleanAccessor (&TrafficParameters::m_uplinkDownlink)
+                   MakeBooleanAccessor (&TrafficParameters::m_uplinkDownlink),
                    MakeBooleanChecker ())
   ;
   return tid;
@@ -93,6 +91,7 @@ TrafficParameters::SetSimulationTime (Time simulationTime)
   m_simulationTime = simulationTime;
 
 }
+
 Time
 TrafficParameters::GetSimulationTime (void) const
 {

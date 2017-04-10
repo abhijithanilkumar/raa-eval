@@ -27,8 +27,6 @@
 #include <stdint.h>
 
 #include "ns3/object.h"
-#include "ns3/ptr.h"
-#include "ns3/node.h"
 #include "ns3/core-module.h"
 #include "ns3/traffic-parameters.h"
 
@@ -65,7 +63,7 @@ public:
    *
    * \param traffic Object of TrafficParameters class that contains the traffic information
    */
-  //void SetTopologyParameters (Ptr<TrafficParameters> traffic);
+  void SetTopologyParameters (Ptr<TrafficParameters> traffic);
 
   /**
    * \brief Set the RTS-CTS Threshold

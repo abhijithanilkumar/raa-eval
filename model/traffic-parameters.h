@@ -21,10 +21,11 @@
 
 //Implement an object to set traffic parameters in raa-eval
 
-#ifdef TRAFFIC_PARAMETERS_H
+#ifndef TRAFFIC_PARAMETERS_H
 #define TRAFFIC_PARAMETERS_H
 
 #include <stdint.h>
+
 #include "ns3/object.h"
 #include "ns3/core-module.h"
 

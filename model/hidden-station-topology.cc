@@ -58,8 +58,8 @@ CreateHiddenStationTopology (Ptr<TrafficParameters> traffic, std::string fileNam
   //Set Topology Parameters
   SetTopologyParameters (traffic);
 
-  apNumber = 2;
-  staNumber = 2;
+  size_t apNumber = 2;
+  size_t staNumber = 2;
   /*m_radius = 60;*/
 
   //Create Nodes
@@ -67,7 +67,7 @@ CreateHiddenStationTopology (Ptr<TrafficParameters> traffic, std::string fileNam
   nodes.Create (apNumber+staNumber);
 
   //Set RTS-CTS Threshold
-  Config::SetDefault ("ns3::WifiRemoteStationManager::RtsCtsThreshold", traffic->GetRtsCtsThreshold ());
+  Config::SetDefault ("ns3::WifiRemoteStationManager::RtsCtsThreshold", GetRtsCtsThreshold ());
 
   //Create Mobility Model
   MobilityHelper mobility;
