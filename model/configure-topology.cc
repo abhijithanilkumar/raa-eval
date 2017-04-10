@@ -40,12 +40,12 @@ ConfigureTopology::GetTypeId (void)
                    "Enegy Detection Threshold in dbm",
                    DoubleValue(-95.0),
                    MakeDoubleAccessor (&ConfigureTopology::m_energyDetectionThreshold),
-                   MakeDoubleChecker<double> (0))
+                   MakeDoubleChecker<double> ())
     .AddAttribute ("CcaMode1Threshold",
                    "CcaMode1Threshold in dbm",
                    DoubleValue(-95.0),
                    MakeDoubleAccessor (&ConfigureTopology::m_ccaMode1Threshold),
-                   MakeDoubleChecker<double> (0))
+                   MakeDoubleChecker<double> ())
     .AddAttribute ("TxPowerStart",
                    "Minimum Available Transmission Level in dbm",
                    DoubleValue(23.0),
@@ -65,7 +65,7 @@ ConfigureTopology::GetTypeId (void)
                    "Reception Gain in dB",
                    DoubleValue(-25.0),
                    MakeDoubleAccessor (&ConfigureTopology::m_rxGain),
-                   MakeDoubleChecker<double> (0))
+                   MakeDoubleChecker<double> ())
   ;
   return tid;
 }
