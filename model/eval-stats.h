@@ -58,7 +58,7 @@ public:
    * \param in_simTime simulation time used in the current simulation.
    * \param filename The file to which the computed values are stored.
    */
-  EvalStats (std::map<FlowId, FlowMonitor::FlowStats> stats, size_t in_simTime, std::string fileName);
+  EvalStats (size_t apNumber, size_t nodeNumber, std::string fileName);
 
   /**
    * \brief Destructor
@@ -73,7 +73,7 @@ public:
    * 
    *\param stat FlowStats of a flow used in the current simulation.
    */
-  void ComputeMetrics (std::map<FlowId, FlowMonitor::FlowStats> stat);
+  void ComputeMetrics ();
 
   /**
    * \brief inserts throughput, accumalted throughput and packet loss ratio into the file.
@@ -84,6 +84,10 @@ public:
   void InsertIntoFile ();
 
   /**
+   *
+   */
+  //void CalculateThroughput();
+  /**
     * \brief Iterates through each flow.
     *
     * Obtains the flow monitor on each flow.
@@ -91,9 +95,11 @@ public:
     * \param stats FlowStats used in the current simulation.
     *
     */
-  void Install (std::map<FlowId, FlowMonitor::FlowStats> stats);
+  void Install (NodeContainer nodes, size_t simTime);
 
 private:
+  size_t                      m_apNumber;
+  size_t                      m_nodeNumber;
   size_t                      m_simTime;
   uint64_t                    m_txBytes;
   uint64_t                    m_rxBytes;
@@ -105,7 +111,7 @@ private:
   double                      m_accumulatedThroughput;  //!< The value of accumulated throughput across all flows.
   std::string                 m_evalStatsFileName;	//!< Name of file where the output is stored
   std::ofstream               m_evalStatsFile;		//!< The file for storing the output
-
+  NodeContainer               m_nodes;
 };
 
 }

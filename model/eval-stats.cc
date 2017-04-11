@@ -25,12 +25,12 @@
 
 namespace ns3 {
 
-EvalStats::EvalStats (std::map<FlowId, FlowMonitor::FlowStats> stats, size_t in_simTime, std::string fileName)
+EvalStats::EvalStats (size_t apNumber, size_t nodeNumber, std::string fileName)
 {
-  m_simTime = in_simTime;
+  this->m_apNumber = apNumber;
+  this->m_nodeNumber = nodeNumber;
   m_evalStatsFileName.assign (fileName);
   m_accumulatedThroughput = 0;
-  Install(stats);
 }
 
 EvalStats::~EvalStats ()
@@ -40,26 +40,53 @@ EvalStats::~EvalStats ()
 
 // Computes throughput, accumalted throughput and packet loss ratio.
 void
-EvalStats::ComputeMetrics (std::map<FlowId, FlowMonitor::FlowStats> stat)
+EvalStats::ComputeMetrics ()
 {
-  Ipv4FlowClassifier::FiveTuple t = classifier->FindFlow (stat->first);
-  //this->flow = i->first<< " (" << t.sourceAddress << " -> " << t.destinationAddress << ")\n";
-  m_txBytes = stat->second.txBytes;
-  m_rxBytes = stat->second.rxBytes;
-  m_txPackets = stat->second.txPackets;
-  m_rxPackets = stat->second.rxPackets;
-  m_lostPackets = stat->second.lostPackets;
-  m_pktLostRatio = ((double)stat->second.txPackets-(double)stat->second.rxPackets)/(double)stat->second.txPackets;
-  m_throughput = stat->second.rxBytes * 8.0 / m_simTime / 1024 / 1024; //Conversion to Mbps
-  m_accumulatedThroughput+=(stat->second.rxBytes*8.0/m_simTime/1024/1024);
-  InsertIntoFile();
+  // 8. Install FlowMonitor on all nodes
+  //Simulator::Schedule (Seconds (1.1), &CalculateThroughput);
+
+  FlowMonitorHelper flowmon;
+  Ptr<FlowMonitor> monitor = flowmon.InstallAll ();
+
+  // 9. Run simulation
+  Simulator::Stop (Seconds (m_simTime));
+  AnimationInterface anim ("multiAp.xml");
+  Simulator::Run ();
+
+  // 10. Print per flow statistics
+  monitor->CheckForLostPackets ();
+  Ptr<Ipv4FlowClassifier> classifier = DynamicCast<Ipv4FlowClassifier>(flowmon.GetClassifier());
+  std::map<FlowId, FlowMonitor::FlowStats> stats = monitor->GetFlowStats ();
+  
+  m_evalStatsFile.open (m_evalStatsFileName.c_str (), std::ios::app);
+  for (std::map<FlowId, FlowMonitor::FlowStats>::const_iterator i=stats.begin();
+        i!=stats.end(); ++i)
+  {
+    Ipv4FlowClassifier::FiveTuple t = classifier->FindFlow (i->first);
+    m_evalStatsFile << "Flow " << i->first<< " (" << t.sourceAddress << " -> " << t.destinationAddress << ")\n";
+    m_txBytes = i->second.txBytes;
+    m_rxBytes = i->second.rxBytes;
+    m_txPackets = i->second.txPackets;
+    m_rxPackets = i->second.rxPackets;
+    m_lostPackets = i->second.lostPackets;
+    m_pktLostRatio = ((double)i->second.txPackets-(double)i->second.rxPackets)/(double)i->second.txPackets;
+    m_throughput = i->second.rxBytes * 8.0 / m_simTime / 1024 / 1024; //Conversion to Mbps
+    m_accumulatedThroughput+=(i->second.rxBytes*8.0/m_simTime/1024/1024);
+    InsertIntoFile();
+  }
+  m_evalStatsFile << "apNumber=" <<m_apNumber << " nodeNumber=" << m_nodeNumber << "\n" << std::flush;
+  m_evalStatsFile << "throughput=" << m_accumulatedThroughput << "\n" << std::flush;
+ // std::cout << "tx=" << m_txOkCount << " RXerror=" <<m_rxErrorCount <<
+ //              " Rxok=" << m_rxOkCount << "\n" << std::flush;
+  m_evalStatsFile << "===========================\n" << std::flush;
+  // 11. Cleanup
+  Simulator::Destroy ();
 }
 
 // Inserts the values computed in the ComputeMetrics into the file
 void
 EvalStats::InsertIntoFile ()
 {
-  m_evalStatsFile.open (m_evalStatsFileName.c_str (), std::ios::app);
   m_evalStatsFile << "  Tx Bytes:   " << m_txBytes << "\n";
   m_evalStatsFile << "  Rx Bytes:   " << m_rxBytes << "\n";
   m_evalStatsFile << "  Tx Packets: " << m_txPackets << "\n";
@@ -67,19 +94,15 @@ EvalStats::InsertIntoFile ()
   m_evalStatsFile << "  Lost Packets: " << m_lostPackets << "\n";
   m_evalStatsFile << "  Pkt Lost Ratio: " << m_pktLostRatio << "\n";
   m_evalStatsFile << "  Throughput: " << m_throughput << " Mbps\n";
-  m_evalStatsFile << " Accumulated Throughput: " << m_accumulatedThroughput << "Mbps\n";  
 
   m_evalStatsFile << std::endl;
 }
 
-
-// It takes flowmonitor stats as input and computes metrics for each flow.
 void
-EvalStats::Install (std::map<FlowId, FlowMonitor::FlowStats> stats)
+EvalStats::Install (NodeContainer nodes, size_t simTime)
 {
-  for (std::map<FlowId, FlowMonitor::FlowStats>::const_iterator i=stats.begin();
-        i!=stats.end(); ++i)
-  {
-    ComputeMetrics(i);
-  }
+  this->m_simTime = simTime;
+  this->m_nodes = nodes;
+  ComputeMetrics();
+}
 }

@@ -12,6 +12,7 @@ def build(bld):
         'model/configure-topology.cc',
         'model/traffic-parameters.cc',
         'model/hidden-station-topology.cc',
+        'model/eval-stats.cc'
         ]
 
     module_test = bld.create_ns3_module_test_library('raa-eval')
@@ -25,6 +26,7 @@ def build(bld):
         'model/configure-topology.h',
         'model/traffic-parameters.h',
         'model/hidden-station-topology.h',
+        'model/eval-stats.h'
         ]
 
     if bld.env.ENABLE_EXAMPLES:
