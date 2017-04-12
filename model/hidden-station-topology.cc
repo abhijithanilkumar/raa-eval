@@ -169,7 +169,7 @@ HiddenStationTopology::CreateHiddenStationTopology (Ptr<TrafficParameters> traff
                         InetSocketAddress (Ipv4Address(s.c_str()),  cbrPort));
       sinkApps = sink.Install (nodes);
       sinkApps.Start (Seconds (0.00));
-      sinkApps.Stop (Seconds (traffic->GetSimulationTime ()));
+      sinkApps.Stop (traffic->GetSimulationTime ());
 
       if(traffic->IsUplinkDownlink ())
       {
@@ -229,9 +229,9 @@ HiddenStationTopology::CreateHiddenStationTopology (Ptr<TrafficParameters> traff
       }
     }
   }
-  Ptr<EvalStats> evalStats = CreateObject<EvalStats> (apNumber, staNumber, "hidden-topology");
+  Ptr<EvalStats> evalStats = CreateObject<EvalStats> (apNumber, staNumber, "hidden-topology.txt");
   evalStats->Install(nodes, traffic);
-  
+
   Simulator::Stop (Time::FromDouble (((traffic->GetSimulationTime ()).ToDouble (Time::S) + 5), Time::S));
   Simulator::Run ();
   Simulator::Destroy ();
