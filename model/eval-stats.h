@@ -36,6 +36,7 @@
 #include "ns3/flow-monitor-module.h"
 #include "ns3/wifi-module.h"
 #include "ns3/netanim-module.h"
+#include "traffic-parameters.h"
 
 #include "ns3/applications-module.h"
 
@@ -95,7 +96,7 @@ public:
     * \param stats FlowStats used in the current simulation.
     *
     */
-  void Install (NodeContainer nodes, size_t simTime);
+  void Install (NodeContainer nodes, Ptr<TrafficParameters> traffic);
 
 private:
   size_t                      m_apNumber;

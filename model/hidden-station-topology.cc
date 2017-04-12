@@ -35,6 +35,7 @@
 #include "ns3/internet-module.h"
 #include "ns3/flow-monitor-module.h"
 #include "ns3/wifi-module.h"
+#include "eval-stats.h"
 
 namespace ns3 {
 
@@ -228,7 +229,9 @@ HiddenStationTopology::CreateHiddenStationTopology (Ptr<TrafficParameters> traff
       }
     }
   }
-
+  Ptr<EvalStats> evalStats = CreateObject<EvalStats> (apNumber, staNumber, "hidden-topology");
+  evalStats->Install(nodes, traffic);
+  
   Simulator::Stop (Time::FromDouble (((traffic->GetSimulationTime ()).ToDouble (Time::S) + 5), Time::S));
   Simulator::Run ();
   Simulator::Destroy ();

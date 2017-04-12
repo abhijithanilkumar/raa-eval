@@ -85,7 +85,7 @@ main (int argc, char *argv[])
 
   Ptr<TrafficParameters> trafficParams = CreateObject <TrafficParameters> ();
   Ptr<HiddenStationTopology> hiddenStation = CreateObject <HiddenStationTopology> ();
-  //hiddenStation->CreateHiddenStationTopology (trafficParams, fileName);
+  hiddenStation->CreateHiddenStationTopology (trafficParams, fileName);
 
   Simulator::Run ();
   Simulator::Destroy ();

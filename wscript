@@ -7,7 +7,7 @@
 #     conf.check_nonfatal(header_name='stdint.h', define_name='HAVE_STDINT_H')
 
 def build(bld):
-    module = bld.create_ns3_module('raa-eval', ['core','network','internet','wifi','applications'])
+    module = bld.create_ns3_module('raa-eval', ['core','network','internet','wifi','applications','flow-monitor', 'netanim'])
     module.source = [
         'model/configure-topology.cc',
         'model/traffic-parameters.cc',

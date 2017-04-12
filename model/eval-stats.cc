@@ -99,9 +99,10 @@ EvalStats::InsertIntoFile ()
 }
 
 void
-EvalStats::Install (NodeContainer nodes, size_t simTime)
+EvalStats::Install (NodeContainer nodes, Ptr<TrafficParameters> traffic)
 {
-  this->m_simTime = simTime;
+  Time simulationTime = traffic->GetSimulationTime ();
+  this->m_simTime = simulationTime.ToInteger (Time::S);
   this->m_nodes = nodes;
   ComputeMetrics();
 }
