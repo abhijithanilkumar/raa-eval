@@ -230,7 +230,7 @@ HiddenStationTopology::CreateHiddenStationTopology (Ptr<TrafficParameters> traff
     }
   }
   Ptr<EvalStats> evalStats = CreateObject<EvalStats> (apNumber, staNumber, "hidden-topology.txt");
-  evalStats->Install(nodes, traffic);
+  evalStats->Install(nodes, sinkApps, traffic);
 
   Simulator::Stop (Time::FromDouble (((traffic->GetSimulationTime ()).ToDouble (Time::S) + 5), Time::S));
   Simulator::Run ();

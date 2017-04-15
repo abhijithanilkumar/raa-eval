@@ -29,6 +29,7 @@
 #include <fstream>
 #include <algorithm>
 #include <vector>
+//#include <sys/stat.h>
 
 #include "ns3/core-module.h"
 #include "ns3/network-module.h"
@@ -41,6 +42,14 @@
 #include "ns3/applications-module.h"
 
 namespace ns3 {
+
+Ptr<PacketSink> staSink;
+uint64_t lastTotalRxSta[] = {};
+void CalculateThroughput (std::string fileName);
+ApplicationContainer sinkApps;
+size_t m_apNumber;
+size_t m_nodeNumber;
+std::string                 m_evalStatsFileName;  //!< Name of file where the output is stored
 
 /**
  * \brief Calculates metrics and outputs it to files.
@@ -66,6 +75,7 @@ public:
    */
   ~EvalStats ();
 
+  void PlotGraph ();
   /**
    * \brief Calculates metrics for each flow.
    *
@@ -96,11 +106,9 @@ public:
     * \param stats FlowStats used in the current simulation.
     *
     */
-  void Install (NodeContainer nodes, Ptr<TrafficParameters> traffic);
+  void Install (NodeContainer nodes, ApplicationContainer sinkApps, Ptr<TrafficParameters> traffic);
 
 private:
-  size_t                      m_apNumber;
-  size_t                      m_nodeNumber;
   size_t                      m_simTime;
   uint64_t                    m_txBytes;
   uint64_t                    m_rxBytes;
@@ -110,7 +118,6 @@ private:
   double                      m_pktLostRatio;
   double                      m_throughput;
   double                      m_accumulatedThroughput;  //!< The value of accumulated throughput across all flows.
-  std::string                 m_evalStatsFileName;	//!< Name of file where the output is stored
   std::ofstream               m_evalStatsFile;		//!< The file for storing the output
   NodeContainer               m_nodes;
 };
