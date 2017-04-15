@@ -129,9 +129,9 @@ HiddenStationTopology::CreateHiddenStationTopology (Ptr<TrafficParameters> traff
   YansWifiChannelHelper wifiChannel;
   YansWifiPhyHelper wifiPhy;
   wifi.SetStandard (WIFI_PHY_STANDARD_80211b);
-  wifi.SetRemoteStationManager (raaName.c_str (),
-                              "DataMode", StringValue ("DsssRate11Mbps"),
-                              "ControlMode", StringValue ("DsssRate5_5Mbps"));
+  wifi.SetRemoteStationManager (raaName.c_str ());
+                              /*"DataMode", StringValue ("DsssRate11Mbps"),
+                              "ControlMode", StringValue ("DsssRate5_5Mbps"));*/
   wifiChannel.SetPropagationDelay ("ns3::ConstantSpeedPropagationDelayModel");
   wifiChannel.AddPropagationLoss ("ns3::TwoRayGroundPropagationLossModel",
                                   "Frequency", DoubleValue(2.400e9));

@@ -12,3 +12,6 @@ def build(bld):
 
     obj = bld.create_ns3_program('drive-cci-scenario', ['internet', 'mobility', 'wifi', 'applications', 'propagation', 'raa-eval', 'flow-monitor', 'netanim'])
     obj.source = 'drive-cci-scenario.cc'
+
+    obj = bld.create_ns3_program('ApApInterference', ['raa-eval','internet', 'mobility', 'wifi', 'applications', 'propagation', 'raa-eval', 'flow-monitor', 'netanim'])
+    obj.source = 'cci-ap-ap-interference.cc'
