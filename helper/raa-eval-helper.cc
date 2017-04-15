@@ -58,7 +58,7 @@ CCIScenarioHelper::ConfigureWifiChannel (double energyDetectionThreshold, double
   Config::SetDefault ("ns3::ConfigureTopology::CcaMode1Threshold", DoubleValue (ccaMode1Threshold));
   Config::SetDefault ("ns3::ConfigureTopology::RxGain", DoubleValue (rxGain));
   Config::SetDefault ("ns3::ConfigureTopology::TxPowerStart", DoubleValue (txPowerStart));
-  //Config::SetDefault ("ns3::ConfigureTopology::TxPowerEnd", DoubleValue (txPowerEnd));
+  Config::SetDefault ("ns3::ConfigureTopology::TxPowerEnd", DoubleValue (txPowerEnd));
   Config::SetDefault ("ns3::ConfigureTopology::ChannelNumber", UintegerValue (channelNumber));
 }
 
