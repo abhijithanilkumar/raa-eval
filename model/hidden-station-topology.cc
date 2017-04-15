@@ -62,14 +62,11 @@ HiddenStationTopology::~HiddenStationTopology (void)
 }
 
 void
-HiddenStationTopology::CreateHiddenStationTopology (Ptr<TrafficParameters> traffic, std::string fileName)
+HiddenStationTopology::CreateHiddenStationTopology (Ptr<TrafficParameters> traffic, size_t apNumber,
+    size_t staNumber, size_t scenarioNumber, std::string fileName)
 {
   //Set Topology Parameters
   SetTopologyParameters (traffic);
-
-  size_t apNumber = 2;
-  size_t staNumber = 2;
-  /*m_radius = 60;*/
 
   //Create Nodes
   NodeContainer nodes;
@@ -86,7 +83,19 @@ HiddenStationTopology::CreateHiddenStationTopology (Ptr<TrafficParameters> traff
   mobility.SetMobilityModel ("ns3::ConstantVelocityMobilityModel");
   for (size_t i=0; i<apNumber; ++i)
   {
-    apPosAlloc->Add (Vector ((160*i), 0, 1));
+    if (scenarioNumber == 1)
+      apPosAlloc->Add (Vector ((160*i), 0, 1));
+    else if (scenarioNumber == 2)
+      apPosAlloc->Add(Vector((500*i), 0, 1)); //A1,A2 - Case 2
+    else if (scenarioNumber == 3)
+      apPosAlloc->Add(Vector((60*i)+90, 0, 1)); //A1,A2 - Case 3
+    else if (scenarioNumber == 4)
+      apPosAlloc->Add(Vector((260*i)+90, 0, 1)); //A1,A2 - Case 4
+    else
+    {
+      NS_LOG_DEBUG ("Invalid Scenario Selected");
+      exit (1);
+    }
   }
   mobility.SetPositionAllocator (apPosAlloc);
   for (size_t i=0; i<apNumber; ++i)
@@ -95,7 +104,19 @@ HiddenStationTopology::CreateHiddenStationTopology (Ptr<TrafficParameters> traff
   }
   for (size_t i=0; i<staNumber; ++i)
   {
-    staPosAlloc->Add (Vector (80, 0, 1));
+    if (scenarioNumber == 1)
+      staPosAlloc->Add (Vector (80, 0, 1));
+    else if (scenarioNumber == 2)
+      staPosAlloc->Add(Vector((500*i), 80, 1)); //C1,C2 - Case 2
+    else if (scenarioNumber == 3)
+      staPosAlloc->Add(Vector(( (20*i*i*i)-(105*i*i)+(195*i)  ), 0, 1)); //C1,C2,C3,C4 - Case 3
+    else if (scenarioNumber == 4)
+      staPosAlloc->Add(Vector(( (-46.67*i*i*i)+(195*i*i)-(38.33*i)  ), 0, 1)); //C1,C2,C3,C4 - Case 4
+    else
+    {
+      NS_LOG_DEBUG ("Invalid Scenario Selected");
+      exit (1);
+    }
   }
   mobility.SetPositionAllocator (staPosAlloc);
   for (size_t i=0; i<staNumber; ++i)
@@ -230,8 +251,8 @@ HiddenStationTopology::CreateHiddenStationTopology (Ptr<TrafficParameters> traff
     }
   }
 
-  Ptr<EvalStats> evalStats = CreateObject<EvalStats> (apNumber, staNumber, fileName);
-  evalStats->Install(nodes, sinkApps, traffic);
+  //Ptr<EvalStats> evalStats = CreateObject<EvalStats> (apNumber, staNumber, fileName);
+  //evalStats->Install(nodes, sinkApps, traffic);
 
   Simulator::Stop (Time::FromDouble (((traffic->GetSimulationTime ()).ToDouble (Time::S) + 5), Time::S));
   Simulator::Run ();

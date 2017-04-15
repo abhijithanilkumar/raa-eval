@@ -60,9 +60,13 @@ public:
    *
    * \param traffic Object of TrafficParameters class that contains the information of
    *                          traffic related parameters.
+   * \param apNumber Number of APs used in the scenario
+   * \param staNumber Number of clients used in the scenario
+   * \param scenarioNumber The number of the Scenario used
    * \param fileName The name of the file whtere stats are to be dumped.
    */
-  void CreateHiddenStationTopology (Ptr <TrafficParameters> traffic, std::string fileName);
+   void CreateHiddenStationTopology (Ptr<TrafficParameters> traffic, size_t apNumber,
+       size_t staNumber, size_t scenarioNumber, std::string fileName);
 
 };
 
