@@ -89,14 +89,14 @@ EvalStats::ComputeMetrics ()
 
   // 9. Run simulation
   Simulator::Stop (Seconds (m_simTime));
-  AnimationInterface anim ("multiAp.xml");
+  AnimationInterface anim ("hidden-station-topology.xml");
   Simulator::Run ();
 
   // 10. Print per flow statistics
   monitor->CheckForLostPackets ();
   Ptr<Ipv4FlowClassifier> classifier = DynamicCast<Ipv4FlowClassifier>(flowmon.GetClassifier());
   std::map<FlowId, FlowMonitor::FlowStats> stats = monitor->GetFlowStats ();
-  
+
   m_evalStatsFile.open (m_evalStatsFileName.c_str (), std::ios::app);
   for (std::map<FlowId, FlowMonitor::FlowStats>::const_iterator i=stats.begin();
         i!=stats.end(); ++i)

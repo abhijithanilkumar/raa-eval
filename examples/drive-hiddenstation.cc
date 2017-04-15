@@ -50,7 +50,7 @@ main (int argc, char *argv[])
   Time simulationTime;
 
   // Default filename to store results
-  std::string fileName = "RaaEvalHiddenStation";
+  std::string fileName = "raa-eval-hidden-station-results.txt";
 
   // Allow the user to change values by command line arguments
   CommandLine cmd;

@@ -30,12 +30,8 @@
 #include <algorithm>
 #include <vector>
 //#include <sys/stat.h>
-
 #include "ns3/core-module.h"
-#include "ns3/network-module.h"
-#include "ns3/internet-module.h"
 #include "ns3/flow-monitor-module.h"
-#include "ns3/wifi-module.h"
 #include "ns3/netanim-module.h"
 #include "traffic-parameters.h"
 
@@ -81,7 +77,7 @@ public:
    *
    * Computes metrics such as throughput, accumalted throughput and packet loss ratio
    * accross each flow and stores the output in a file.
-   * 
+   *
    *\param stat FlowStats of a flow used in the current simulation.
    */
   void ComputeMetrics ();

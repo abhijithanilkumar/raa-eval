@@ -11,4 +11,3 @@ namespace ns3 {
 }
 
 #endif /* RAA_EVAL_HELPER_H */
-
