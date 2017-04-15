@@ -63,7 +63,7 @@ HiddenStationTopology::~HiddenStationTopology (void)
 
 void
 HiddenStationTopology::CreateHiddenStationTopology (Ptr<TrafficParameters> traffic, size_t apNumber,
-    size_t staNumber, size_t scenarioNumber, std::string fileName)
+    size_t staNumber, size_t scenarioNumber, std::string raaName, std::string fileName)
 {
   //Set Topology Parameters
   SetTopologyParameters (traffic);
@@ -129,7 +129,7 @@ HiddenStationTopology::CreateHiddenStationTopology (Ptr<TrafficParameters> traff
   YansWifiChannelHelper wifiChannel;
   YansWifiPhyHelper wifiPhy;
   wifi.SetStandard (WIFI_PHY_STANDARD_80211b);
-  wifi.SetRemoteStationManager ("ns3::ConstantRateWifiManager",
+  wifi.SetRemoteStationManager (raaName.c_str (),
                               "DataMode", StringValue ("DsssRate11Mbps"),
                               "ControlMode", StringValue ("DsssRate5_5Mbps"));
   wifiChannel.SetPropagationDelay ("ns3::ConstantSpeedPropagationDelayModel");

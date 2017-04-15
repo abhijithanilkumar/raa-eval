@@ -85,7 +85,7 @@ main (int argc, char *argv[])
 
   Ptr<TrafficParameters> trafficParams = CreateObject <TrafficParameters> ();
   Ptr<HiddenStationTopology> hiddenStation = CreateObject <HiddenStationTopology> ();
-  hiddenStation->CreateHiddenStationTopology (trafficParams, 2, 2, 1, fileName);
+  hiddenStation->CreateHiddenStationTopology (trafficParams, 2, 2, 1, "ns3::ConstantRateWifiManager", fileName);
 
   Simulator::Run ();
   Simulator::Destroy ();

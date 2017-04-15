@@ -63,10 +63,11 @@ public:
    * \param apNumber Number of APs used in the scenario
    * \param staNumber Number of clients used in the scenario
    * \param scenarioNumber The number of the Scenario used
+   * \param raaName RAA to be used in the scenario
    * \param fileName The name of the file whtere stats are to be dumped.
    */
    void CreateHiddenStationTopology (Ptr<TrafficParameters> traffic, size_t apNumber,
-       size_t staNumber, size_t scenarioNumber, std::string fileName);
+       size_t staNumber, size_t scenarioNumber, std::string raaName, std::string fileName);
 
 };
 

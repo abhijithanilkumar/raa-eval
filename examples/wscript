@@ -10,5 +10,5 @@ def build(bld):
     obj = bld.create_ns3_program('multi-ap', ['internet', 'point-to-point', 'mobility', 'wifi', 'applications', 'propagation', 'raa-eval', 'flow-monitor', 'netanim'])
     obj.source = 'multi-ap.cc'
 
-    obj = bld.create_ns3_program('drive-hiddenstation', ['internet', 'mobility', 'wifi', 'applications', 'propagation', 'raa-eval', 'flow-monitor', 'netanim'])
-    obj.source = 'drive-hiddenstation.cc'
+    obj = bld.create_ns3_program('drive-cci-scenario', ['internet', 'mobility', 'wifi', 'applications', 'propagation', 'raa-eval', 'flow-monitor', 'netanim'])
+    obj.source = 'drive-cci-scenario.cc'
