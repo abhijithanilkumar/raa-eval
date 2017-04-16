@@ -64,7 +64,6 @@ public:
    */
   ~EvalStats ();
 
-  void PlotGraph ();
   void CalculateThroughput ();
   /**
    * \brief Calculates metrics for each flow.
