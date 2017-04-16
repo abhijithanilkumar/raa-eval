@@ -31,7 +31,7 @@ EvalStats::EvalStats (size_t apNumber, size_t nodeNumber, std::string fileName)
   this->m_nodeNumber = nodeNumber;
   m_evalStatsFileName.assign (fileName);
   m_accumulatedThroughput = 0;
-  for (int i=0; i<nodeNumber; ++i)
+  for (size_t i=0; i<nodeNumber; ++i)
     m_lastTotalRxSta.push_back(0);
 }
 
@@ -40,11 +40,11 @@ EvalStats::~EvalStats ()
   m_evalStatsFile.close ();
 }
 
-void 
+void
 EvalStats::CalculateThroughput()
 {
   Time now = Simulator::Now ();
-  
+
 
   /* Calculate throughput for downlink */
   double sumRx = 0, avgRx = 0;
@@ -149,8 +149,8 @@ EvalStats::Install (NodeContainer nodes, ApplicationContainer sinkApps, Ptr<Traf
   this->m_simTime = simulationTime.ToInteger (Time::S);
   this->m_nodes = nodes;
   this->m_sinkApps = sinkApps;
-  //mkdir("raa-eval-output", 0700);
-  //mkdir("raa-eval-graph", 0700);
+  mkdir("raa-eval-output", 0700);
+  mkdir("raa-eval-graph", 0700);
   ComputeMetrics();
 }
 }

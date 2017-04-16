@@ -29,7 +29,7 @@
 #include <fstream>
 #include <algorithm>
 #include <vector>
-//#include <sys/stat.h>
+#include <sys/stat.h>
 #include "ns3/core-module.h"
 #include "ns3/flow-monitor-module.h"
 #include "ns3/netanim-module.h"
@@ -39,7 +39,7 @@
 
 namespace ns3 {
 
-  
+
 /**
  * \brief Calculates metrics and outputs it to files.
  *
