@@ -29,14 +29,17 @@ CCIScenarioHelper::CCIScenarioHelper ()
            "ns3::ArfWifiManager",
            "ns3::AarfWifiManager",
            "ns3::AarfcdWifiManager",
+           "ns3::AmrrWifiManager",
            "ns3::CaraWifiManager",
            "ns3::IdealWifiManager",
            "ns3::MinstrelWifiManager",
            "ns3::ParfWifiManager",
            "ns3::AparfWifiManager",
-           "ns3::OnoeWifiManager",
-           "ns3::RraaWifiManager"};
-  m_nRAA = 3;
+           //"ns3::OnoeWifiManager",
+           //"ns3::RraaWifiManager",
+           //"ns3::MinstrelHtWifiManager",
+          };
+  m_nRAA = 10;
 }
 
 CCIScenarioHelper::~CCIScenarioHelper ()
@@ -65,10 +68,10 @@ CCIScenarioHelper::ConfigureWifiChannel (double energyDetectionThreshold, double
 void
 CCIScenarioHelper::RunSimulation (Time simulationTime)
 {
-  for (uint32_t i = 1; i < m_nRAA; i++)
-    {
-      Config::SetDefault ("ns3::TrafficParameters::SimulationTime", TimeValue (simulationTime));
-      CreateScenario (m_RAA[i], simulationTime);
-    }
+  for (uint32_t i = 0; i < m_nRAA; i++)
+  {
+    Config::SetDefault ("ns3::TrafficParameters::SimulationTime", TimeValue (simulationTime));
+    CreateScenario (m_RAA[i], simulationTime);
+  }
 }
 }

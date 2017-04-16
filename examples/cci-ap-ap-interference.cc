@@ -54,7 +54,8 @@ ApInterference::CreateScenario (std::string raa, Time simulationTime)
   bool useRtsCts = true;
   size_t apNumber = 2;
   size_t staNumber = 2;
-  std::string fileName = "raa-eval-cci-ap-inteference.txt";
+  std::string fileName = "raa-eval-cci-ap-inteference-" + raa.substr (5);
+  std::cout << "Using "+raa.substr (5) << "\n";
 
   // Set traffic parameters
   Config::SetDefault ("ns3::TrafficParameters::UplinkDownlink", BooleanValue (uplinkDownlink));
@@ -75,5 +76,5 @@ main (int argc, char *argv[])
 
   ApInterference sce;
   sce.ConfigureWifiChannel (-95.0, -95.0, -25.0, 23.0, 23.0, 1);
-  sce.RunSimulation (Seconds (50));
+  sce.RunSimulation (Seconds (5));
 }
