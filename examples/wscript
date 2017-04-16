@@ -15,3 +15,15 @@ def build(bld):
 
     obj = bld.create_ns3_program('ApApInterference', ['raa-eval','internet', 'mobility', 'wifi', 'applications', 'propagation', 'raa-eval', 'flow-monitor', 'netanim'])
     obj.source = 'cci-ap-ap-interference.cc'
+
+    obj = bld.create_ns3_program('ApApNoInterference', ['raa-eval','internet', 'mobility', 'wifi', 'applications', 'propagation', 'raa-eval', 'flow-monitor', 'netanim'])
+    obj.source = 'cci-ap-ap-no-interference.cc'
+
+    obj = bld.create_ns3_program('StaApLinkSuppression', ['raa-eval','internet', 'mobility', 'wifi', 'applications', 'propagation', 'raa-eval', 'flow-monitor', 'netanim'])
+    obj.source = 'cci-sta-ap-link-suppression.cc'
+
+    obj = bld.create_ns3_program('StaApNoSuppression', ['raa-eval','internet', 'mobility', 'wifi', 'applications', 'propagation', 'raa-eval', 'flow-monitor', 'netanim'])
+    obj.source = 'cci-sta-ap-no-suppression.cc'
+
+    obj = bld.create_ns3_program('raa-eval-runner', ['raa-eval'])
+    obj.source = 'raa-eval-runner.cc'

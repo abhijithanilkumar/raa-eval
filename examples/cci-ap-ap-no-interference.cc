@@ -19,7 +19,7 @@
  *          Mohit P. Tahiliani <tahiliani@nitk.edu.in>
  */
 
- /* This example creates a scenario that demonstrates AP-AP interference
+ /* This example creates a scenario that has no AP-AP interference
   * in a condition where CCI in involved.
   */
 
@@ -54,7 +54,7 @@ ApInterference::CreateScenario (std::string raa, Time simulationTime)
   bool useRtsCts = true;
   size_t apNumber = 2;
   size_t staNumber = 4;
-  std::string fileName = "ApApInterference/raa-eval-cci-ap-ap-inteference-" + raa.substr (5);
+  std::string fileName = "ApApNoInterference/raa-eval-cci-ap-ap-no-inteference-" + raa.substr (5);
   std::cout << "Using "+raa.substr (5) << "\n";
 
   // Set traffic parameters
@@ -65,7 +65,7 @@ ApInterference::CreateScenario (std::string raa, Time simulationTime)
   // Create the scenario and run it
   Ptr<TrafficParameters> trafficParams = CreateObject <TrafficParameters> ();
   Ptr<HiddenStationTopology> hiddenStation = CreateObject <HiddenStationTopology> ();
-  hiddenStation->CreateHiddenStationTopology (trafficParams, apNumber, staNumber, 3, raa, fileName);
+  hiddenStation->CreateHiddenStationTopology (trafficParams, apNumber, staNumber, 4, raa, fileName);
 }
 
 int

@@ -19,8 +19,8 @@
  *          Mohit P. Tahiliani <tahiliani@nitk.edu.in>
  */
 
- /* This example creates a scenario that demonstrates AP-AP interference
-  * in a condition where CCI in involved.
+ /* This example creates a scenario that demonstrates Station-AP Link
+  * suppression in a condition where CCI in involved.
   */
 
 #include "ns3/log.h"
@@ -29,32 +29,32 @@
 
 using namespace ns3;
 
-class ApInterference : public CCIScenarioHelper
+class StaApSuppression : public CCIScenarioHelper
 {
 public:
-  ApInterference ();
-  ~ApInterference ();
+  StaApSuppression ();
+  ~StaApSuppression ();
 
 protected:
   virtual void CreateScenario (std::string raa, Time simulationTime);
 };
 
-ApInterference::ApInterference ()
+StaApSuppression::StaApSuppression ()
 {
 }
 
-ApInterference::~ApInterference ()
+StaApSuppression::~StaApSuppression ()
 {
 }
 
 void
-ApInterference::CreateScenario (std::string raa, Time simulationTime)
+StaApSuppression::CreateScenario (std::string raa, Time simulationTime)
 {
   bool uplinkDownlink = true;
   bool useRtsCts = true;
   size_t apNumber = 2;
-  size_t staNumber = 4;
-  std::string fileName = "ApApInterference/raa-eval-cci-ap-ap-inteference-" + raa.substr (5);
+  size_t staNumber = 2;
+  std::string fileName = "StaApLinkSuppression/raa-eval-cci-sta-ap-link-suppression-" + raa.substr (5);
   std::cout << "Using "+raa.substr (5) << "\n";
 
   // Set traffic parameters
@@ -65,7 +65,7 @@ ApInterference::CreateScenario (std::string raa, Time simulationTime)
   // Create the scenario and run it
   Ptr<TrafficParameters> trafficParams = CreateObject <TrafficParameters> ();
   Ptr<HiddenStationTopology> hiddenStation = CreateObject <HiddenStationTopology> ();
-  hiddenStation->CreateHiddenStationTopology (trafficParams, apNumber, staNumber, 3, raa, fileName);
+  hiddenStation->CreateHiddenStationTopology (trafficParams, apNumber, staNumber, 1, raa, fileName);
 }
 
 int
@@ -74,7 +74,7 @@ main (int argc, char *argv[])
   CommandLine cmd;
   cmd.Parse (argc, argv);
 
-  ApInterference sce;
+  StaApSuppression sce;
   sce.ConfigureWifiChannel (-95.0, -95.0, -25.0, 23.0, 23.0, 1);
   sce.RunSimulation (Seconds (5));
 }
