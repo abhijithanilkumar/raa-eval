@@ -50,7 +50,7 @@ main (int argc, char *argv[])
   Time simulationTime;
 
   // Default filename to store results
-  std::string fileName = "raa-eval-hidden-station-results.txt";
+  std::string fileName = "raa-eval-hidden-station-results";
 
   // Allow the user to change values by command line arguments
   CommandLine cmd;
@@ -85,7 +85,7 @@ main (int argc, char *argv[])
 
   Ptr<TrafficParameters> trafficParams = CreateObject <TrafficParameters> ();
   Ptr<HiddenStationTopology> hiddenStation = CreateObject <HiddenStationTopology> ();
-  hiddenStation->CreateHiddenStationTopology (trafficParams, 2, 2, 1, "ns3::ConstantRateWifiManager", fileName);
+  hiddenStation->CreateHiddenStationTopology (trafficParams, 2, 2, 1, "ns3::ArfWifiManager", fileName);
 
   Simulator::Run ();
   Simulator::Destroy ();
