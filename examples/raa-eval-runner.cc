@@ -31,22 +31,6 @@
 
 using namespace ns3;
 
-std::vector<std::string> RAA = {"ns3::ConstantRateWifiManager",
-         "ns3::ArfWifiManager",
-         "ns3::AarfWifiManager",
-         "ns3::AarfcdWifiManager",
-         "ns3::AmrrWifiManager",
-         "ns3::CaraWifiManager",
-         "ns3::IdealWifiManager",
-         "ns3::MinstrelWifiManager",
-         "ns3::ParfWifiManager",
-         "ns3::AparfWifiManager",
-         //"ns3::OnoeWifiManager",
-         //"ns3::RraaWifiManager",
-         //"ns3::MinstrelHtWifiManager",
-        };
-uint32_t nRAA = 10;
-
 void RunOneScenario (std::string scenarioName)
 {
   mkdir((std::string("raa-eval-output/")+scenarioName).c_str (), 0700);
