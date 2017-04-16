@@ -63,7 +63,7 @@ EvalStats::CalculateThroughput()
   //std::cout << now.GetSeconds () << "s: \t" << avgRx << " Mbit/s" << std::endl;
   m_throughputFile << now.GetSeconds () <<", "<< avgRx << std::endl;
   //myfile << curRxAp << ",";
-  
+
   Simulator::Schedule (MilliSeconds (100), &EvalStats::CalculateThroughput, this);
 }
 
@@ -108,7 +108,7 @@ EvalStats::ComputeMetrics ()
  // std::cout << "tx=" << m_txOkCount << " RXerror=" <<m_rxErrorCount <<
  //              " Rxok=" << m_rxOkCount << "\n" << std::flush;
   m_evalStatsFile << "===========================\n" << std::flush;
-  
+
   // 11. Cleanup
   Simulator::Destroy ();
 }
@@ -135,8 +135,6 @@ EvalStats::Install (NodeContainer nodes, ApplicationContainer sinkApps, Ptr<Traf
   this->m_simTime = simulationTime.ToInteger (Time::S);
   this->m_nodes = nodes;
   this->m_sinkApps = sinkApps;
-  mkdir("raa-eval-output", 0700);
-  mkdir("raa-eval-graph", 0700);
   ComputeMetrics();
 }
 }
