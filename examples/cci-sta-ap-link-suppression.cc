@@ -76,5 +76,5 @@ main (int argc, char *argv[])
 
   StaApSuppression sce;
   sce.ConfigureWifiChannel (-95.0, -95.0, -25.0, 23.0, 23.0, 1);
-  sce.RunSimulation (Seconds (5));
+  sce.RunSimulation (Seconds (50));
 }

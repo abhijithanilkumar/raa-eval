@@ -32,7 +32,6 @@
 #include <sys/stat.h>
 #include "ns3/core-module.h"
 #include "ns3/flow-monitor-module.h"
-#include "ns3/netanim-module.h"
 #include "traffic-parameters.h"
 
 #include "ns3/applications-module.h"

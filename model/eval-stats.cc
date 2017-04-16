@@ -79,7 +79,6 @@ EvalStats::ComputeMetrics ()
 
   // 9. Run simulation
   Simulator::Stop (Seconds (m_simTime));
-  AnimationInterface anim ("hidden-station-topology.xml");
   Simulator::Run ();
 
   // 10. Print per flow statistics
