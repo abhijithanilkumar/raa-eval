@@ -27,10 +27,11 @@ namespace ns3 {
 
 EvalStats::EvalStats (size_t apNumber, size_t nodeNumber, std::string fileName)
 {
-  m_apNumber = apNumber;
-  m_nodeNumber = nodeNumber;
+  this->m_apNumber = apNumber;
+  this->m_nodeNumber = nodeNumber;
   m_evalStatsFileName.assign (fileName);
   m_accumulatedThroughput = 0;
+
 }
 
 EvalStats::~EvalStats ()
@@ -39,15 +40,16 @@ EvalStats::~EvalStats ()
 }
 
 void 
-CalculateThroughput()
+EvalStats::CalculateThroughput()
 {
   Time now = Simulator::Now ();
+  uint64_t lastTotalRxSta[] = {};
 
   /* Calculate throughput for downlink */
-  /*double sumRx = 0, avgRx = 0;
+  double sumRx = 0, avgRx = 0;
   for (uint32_t i = 0; i < m_nodeNumber; ++i)
     {
-      staSink = StaticCast<PacketSink>(sinkApps.Get(m_apNumber + i));
+      staSink = StaticCast<PacketSink>(m_sinkApps.Get(m_apNumber + i));
       double curRxSta = (staSink->GetTotalRx() - lastTotalRxSta[i]) * (double) 8/1e5;
       lastTotalRxSta[i] = staSink->GetTotalRx ();
       sumRx += curRxSta;
@@ -62,7 +64,7 @@ CalculateThroughput()
   myfile << now.GetSeconds () <<"\t"<< avgRx << std::endl;
   //myfile << curRxAp << ",";
   myfile.close();
-  Simulator::Schedule (MilliSeconds (100), &CalculateThroughput);*/
+  Simulator::Schedule (MilliSeconds (100), &EvalStats::CalculateThroughput, this);
 }
 void
 EvalStats::PlotGraph ()
@@ -82,7 +84,7 @@ void
 EvalStats::ComputeMetrics ()
 {
   // 8. Install FlowMonitor on all nodes
-  Simulator::Schedule (Seconds (1.1), &CalculateThroughput);
+  Simulator::Schedule (Seconds (1.1), &EvalStats::CalculateThroughput, this);
 
   FlowMonitorHelper flowmon;
   Ptr<FlowMonitor> monitor = flowmon.InstallAll ();
@@ -120,7 +122,7 @@ EvalStats::ComputeMetrics ()
   m_evalStatsFile << "===========================\n" << std::flush;
   // 11. Cleanup
   Simulator::Destroy ();
-  PlotGraph();
+  //PlotGraph();
 }
 
 // Inserts the values computed in the ComputeMetrics into the file
@@ -144,8 +146,9 @@ EvalStats::Install (NodeContainer nodes, ApplicationContainer sinkApps, Ptr<Traf
   Time simulationTime = traffic->GetSimulationTime ();
   this->m_simTime = simulationTime.ToInteger (Time::S);
   this->m_nodes = nodes;
-  mkdir("raa-eval-output", 0700);
-  mkdir("raa-eval-graph", 0700);
+  this->m_sinkApps = sinkApps;
+  //mkdir("raa-eval-output", 0700);
+  //mkdir("raa-eval-graph", 0700);
   ComputeMetrics();
 }
 }

@@ -39,14 +39,7 @@
 
 namespace ns3 {
 
-Ptr<PacketSink> staSink;
-uint64_t lastTotalRxSta[] = {};
-void CalculateThroughput (std::string fileName);
-ApplicationContainer sinkApps;
-size_t m_apNumber;
-size_t m_nodeNumber;
-std::string                 m_evalStatsFileName;  //!< Name of file where the output is stored
-
+  
 /**
  * \brief Calculates metrics and outputs it to files.
  *
@@ -72,6 +65,7 @@ public:
   ~EvalStats ();
 
   void PlotGraph ();
+  void CalculateThroughput ();
   /**
    * \brief Calculates metrics for each flow.
    *
@@ -116,6 +110,12 @@ private:
   double                      m_accumulatedThroughput;  //!< The value of accumulated throughput across all flows.
   std::ofstream               m_evalStatsFile;		//!< The file for storing the output
   NodeContainer               m_nodes;
+  ApplicationContainer        m_sinkApps;
+  size_t                      m_apNumber;
+  size_t                      m_nodeNumber;
+  std::string                 m_evalStatsFileName;  //!< Name of file where the output is stored
+  Ptr<PacketSink> staSink;
+ 
 };
 
 }

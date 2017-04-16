@@ -12,7 +12,7 @@ def build(bld):
         'model/configure-topology.cc',
         'model/traffic-parameters.cc',
         'model/hidden-station-topology.cc',
-        #'model/eval-stats.cc',
+        'model/eval-stats.cc',
         'helper/raa-eval-helper.cc'
         ]
 
@@ -27,7 +27,7 @@ def build(bld):
         'model/configure-topology.h',
         'model/traffic-parameters.h',
         'model/hidden-station-topology.h',
-        #'model/eval-stats.h'
+        'model/eval-stats.h',
         'helper/raa-eval-helper.h'
         ]
 
