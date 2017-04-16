@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2016 NITK Surathkal
+ * Copyright (c) 2017 NITK Surathkal
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -16,23 +16,23 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * Authors: Abhijith Anilkumar <abhijithabhayam@gmail.com>
+ *          Mohit P. Tahiliani <tahiliani@nitk.edu.in>
  */
 
 // Implement an object to create a hidden station topology in raa-eval.
 
-#ifndef HIDDENSTN_TOPOLOGY_H
-#define HIDDENSTN_TOPOLOGY_H
+#ifndef HIDDEN_STATION_TOPOLOGY_H
+#define HIDDEN_STATION_TOPOLOGY_H
 
 #include "configure-topology.h"
 #include "traffic-parameters.h"
-#include "create-traffic.h"
 
 namespace ns3 {
 
 /*
  * \brief Configures hidden station topology and simulates the traffic accordingly.
  */
-class HiddenstnTopology : public ConfigureTopology
+class HiddenStationTopology : public ConfigureTopology
 {
 public:
   /**
@@ -44,12 +44,12 @@ public:
   /**
    * \brief Constructor
    */
-  HiddenstnTopology (void);
+  HiddenStationTopology (void);
 
   /**
    * \brief Destructor
    */
-  ~HiddenstnTopology (void);
+  ~HiddenStationTopology (void);
 
   /**
    * \brief Invokes methods for creating a hidden station topology and simulating traffic
@@ -60,12 +60,17 @@ public:
    *
    * \param traffic Object of TrafficParameters class that contains the information of
    *                          traffic related parameters.
+   * \param apNumber Number of APs used in the scenario
+   * \param staNumber Number of clients used in the scenario
+   * \param scenarioNumber The number of the Scenario used
+   * \param raaName RAA to be used in the scenario
    * \param fileName The name of the file whtere stats are to be dumped.
    */
-  void CreateHiddenstnTopology (Ptr <TrafficParameters> traffic, std::string fileName);
+   void CreateHiddenStationTopology (Ptr<TrafficParameters> traffic, size_t apNumber,
+       size_t staNumber, size_t scenarioNumber, std::string raaName, std::string fileName);
 
 };
 
 }
 
-#endif /* HIDDENSTN_TOPOLOGY_H */
+#endif /* HIDDEN_STATION_TOPOLOGY_H */

@@ -7,10 +7,13 @@
 #     conf.check_nonfatal(header_name='stdint.h', define_name='HAVE_STDINT_H')
 
 def build(bld):
-    module = bld.create_ns3_module('raa-eval', ['core'])
+    module = bld.create_ns3_module('raa-eval', ['core','network','internet','wifi','applications','flow-monitor', 'netanim'])
     module.source = [
-        'model/raa-eval.cc',
-        'helper/raa-eval-helper.cc',
+        'model/configure-topology.cc',
+        'model/traffic-parameters.cc',
+        'model/hidden-station-topology.cc',
+        'model/eval-stats.cc',
+        'helper/raa-eval-helper.cc'
         ]
 
     module_test = bld.create_ns3_module_test_library('raa-eval')
@@ -21,12 +24,14 @@ def build(bld):
     headers = bld(features='ns3header')
     headers.module = 'raa-eval'
     headers.source = [
-        'model/raa-eval.h',
-        'helper/raa-eval-helper.h',
+        'model/configure-topology.h',
+        'model/traffic-parameters.h',
+        'model/hidden-station-topology.h',
+        'model/eval-stats.h',
+        'helper/raa-eval-helper.h'
         ]
 
     if bld.env.ENABLE_EXAMPLES:
         bld.recurse('examples')
 
     # bld.ns3_python_bindings()
-
