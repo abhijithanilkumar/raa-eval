@@ -31,12 +31,14 @@ EvalStats::EvalStats (size_t apNumber, size_t nodeNumber, std::string fileName)
   this->m_nodeNumber = nodeNumber;
   m_evalStatsFileName.assign (fileName);
   m_accumulatedThroughput = 0;
+  m_throughputFile.open ((std::string("raa-eval-output/") + m_evalStatsFileName + std::string("-throughput.txt")).c_str(), std::fstream::out);
   for (size_t i=0; i<nodeNumber; ++i)
     m_lastTotalRxSta.push_back(0);
 }
 
 EvalStats::~EvalStats ()
 {
+  m_throughputFile.close();
   m_evalStatsFile.close ();
 }
 
@@ -59,23 +61,22 @@ EvalStats::CalculateThroughput()
 
   // Log to CSV
   //std::cout << now.GetSeconds () << "s: \t" << avgRx << " Mbit/s" << std::endl;
-  std::ofstream myfile;
-  myfile.open ((std::string("raa-eval-output/") + m_evalStatsFileName + std::string("-throughput.txt")).c_str(),std::ios_base::app);
-  myfile << std::endl;
-  myfile << now.GetSeconds () <<"\t"<< avgRx << std::endl;
+  m_throughputFile << std::endl;
+  m_throughputFile << now.GetSeconds () <<"\t"<< avgRx << std::endl;
   //myfile << curRxAp << ",";
-  myfile.close();
-  Simulator::Schedule (MilliSeconds (100), &EvalStats::CalculateThroughput, this);
+  
+  Simulator::Schedule (MilliSeconds (1000), &EvalStats::CalculateThroughput, this);
 }
 void
 EvalStats::PlotGraph ()
 {
   std::ofstream outfile;
   outfile.open((std::string("raa-eval-output/") + m_evalStatsFileName + std::string("-plot-shell.plt")).c_str(), std::ios::out | std::ios::trunc);
-  outfile << "set terminal png size 1260, 800\n";
-  outfile << "set output \"raa-eval-graph/"<<m_evalStatsFileName.c_str()<<"-throughput.png\"\n set xlabel \"Time (ms)\" font \"Verdana,24\"\nset ylabel \"Throughput (Mbps)\" font \"Verdana,20\"\n";
-  outfile << "set autoscale\nset grid\nshow grid\nunset key\nset style data lines\n";
-  std::string gnuPlot = (std::string("plot \"raa-eval-output/") + m_evalStatsFileName + std::string("-throughput.txt\" using 1:2")).c_str();
+  outfile << "set terminal png\n";
+  outfile << "set output \"raa-eval-graph/"<<m_evalStatsFileName.c_str()<<"-throughput.png\"\nset xlabel \"Time (ms)\" font \"Verdana,24\"\nset ylabel \"Throughput (Mbps)\" font \"Verdana,20\"\n";
+  outfile << "set title \"Average Throughput of RAAs over time(downlink)\"\n";
+  outfile << "set autoscale\nset grid\nshow grid\nunset key\n";
+  std::string gnuPlot = (std::string("plot \"raa-eval-output/") + m_evalStatsFileName + std::string("-throughput.txt\" using 1:2 with lines")).c_str();
   outfile << gnuPlot;
   system((std::string("gnuplot raa-eval-output/")+m_evalStatsFileName+std::string("-plot-shell.plt")).c_str());
   system("echo \"hello\"");
@@ -122,6 +123,7 @@ EvalStats::ComputeMetrics ()
  // std::cout << "tx=" << m_txOkCount << " RXerror=" <<m_rxErrorCount <<
  //              " Rxok=" << m_rxOkCount << "\n" << std::flush;
   m_evalStatsFile << "===========================\n" << std::flush;
+  
   // 11. Cleanup
   Simulator::Destroy ();
   PlotGraph();

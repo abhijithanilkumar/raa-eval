@@ -116,6 +116,7 @@ private:
   std::string                 m_evalStatsFileName;  //!< Name of file where the output is stored
   Ptr<PacketSink> staSink;
   std::vector<uint32_t>       m_lastTotalRxSta;
+  std::ofstream               m_throughputFile;
 };
 
 }
