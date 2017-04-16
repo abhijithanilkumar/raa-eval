@@ -97,4 +97,5 @@ int main (int argc, char *argv[])
         RunOneScenario (it->second);
       }
   }
+  system("python src/raa-eval/utils/plotgraph.py");
 }
