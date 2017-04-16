@@ -67,6 +67,7 @@ HiddenStationTopology::CreateHiddenStationTopology (Ptr<TrafficParameters> traff
 {
   //Set Topology Parameters
   SetTopologyParameters (traffic);
+  double simTime = traffic->GetSimulationTime ().ToDouble (Time::S);
 
   //Create Nodes
   NodeContainer nodes;
@@ -129,9 +130,12 @@ HiddenStationTopology::CreateHiddenStationTopology (Ptr<TrafficParameters> traff
   YansWifiChannelHelper wifiChannel;
   YansWifiPhyHelper wifiPhy;
   wifi.SetStandard (WIFI_PHY_STANDARD_80211b);
-  wifi.SetRemoteStationManager (raaName.c_str ());
-                              /*"DataMode", StringValue ("DsssRate11Mbps"),
-                              "ControlMode", StringValue ("DsssRate5_5Mbps"));*/
+  if (raaName.compare ("ns3::ConstantRateWifiManager") == 0)
+    wifi.SetRemoteStationManager (raaName.c_str (),
+                              "DataMode", StringValue ("DsssRate11Mbps"),
+                              "ControlMode", StringValue ("DsssRate5_5Mbps"));
+  else
+    wifi.SetRemoteStationManager (raaName.c_str ());
   wifiChannel.SetPropagationDelay ("ns3::ConstantSpeedPropagationDelayModel");
   wifiChannel.AddPropagationLoss ("ns3::TwoRayGroundPropagationLossModel",
                                   "Frequency", DoubleValue(2.400e9));
@@ -204,13 +208,13 @@ HiddenStationTopology::CreateHiddenStationTopology (Ptr<TrafficParameters> traff
       if(traffic->IsUplinkDownlink ())
       {
         onOffHelper.SetAttribute ("StartTime", TimeValue (Seconds (1.00+static_cast<double>(i)/100)));
-        onOffHelper.SetAttribute ("StopTime", TimeValue (Seconds (50.000+static_cast<double>(i)/100)));
+        onOffHelper.SetAttribute ("StopTime", TimeValue (Seconds (simTime+static_cast<double>(i)/100)));
         cbrApps.Add (onOffHelper.Install (nodes.Get (j-1)));
       }
       else
       {
         onOffHelper.SetAttribute ("StartTime", TimeValue (Seconds (1.00)));
-        onOffHelper.SetAttribute ("StopTime", TimeValue (Seconds (50.000+static_cast<double>(j)/100)));
+        onOffHelper.SetAttribute ("StopTime", TimeValue (Seconds (simTime+static_cast<double>(j)/100)));
         cbrApps.Add (onOffHelper.Install (nodes.Get (i)));
       }
     }
@@ -239,13 +243,13 @@ HiddenStationTopology::CreateHiddenStationTopology (Ptr<TrafficParameters> traff
       if(traffic->IsUplinkDownlink ())
       {
         echoClientHelper.SetAttribute ("StartTime", TimeValue (Seconds (0.001)));
-        echoClientHelper.SetAttribute ("StopTime", TimeValue (Seconds (50.001)));
+        echoClientHelper.SetAttribute ("StopTime", TimeValue (Seconds (simTime+0.001)));
         pingApps.Add (echoClientHelper.Install (nodes.Get (j-1)));
       }
       else
       {
         echoClientHelper.SetAttribute ("StartTime", TimeValue (Seconds (0.001)));
-        echoClientHelper.SetAttribute ("StopTime", TimeValue (Seconds (50.001)));
+        echoClientHelper.SetAttribute ("StopTime", TimeValue (Seconds (simTime+0.001)));
         pingApps.Add (echoClientHelper.Install (nodes.Get (i)));
       }
     }
