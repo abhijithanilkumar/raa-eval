@@ -42,7 +42,7 @@ using namespace ns3;
 
 NS_LOG_COMPONENT_DEFINE ("raa-eval-dense");
 Ptr<PacketSink> apSink, staSink;
-const uint32_t nWifi = 30;
+const uint32_t nWifi = 45;
 uint64_t lastTotalRx[nWifi] = {};    /* The value of the last total received bytes */
 uint64_t lastTotalRxAp = 0;
 ApplicationContainer sinkApps;
@@ -63,12 +63,12 @@ CalculateThroughput ()
   for(uint32_t i = 0; i< nWifi; i++)
   {
     staSink = StaticCast<PacketSink>(sinkApps.Get(i));
-    double cur = (staSink->GetTotalRx() - lastTotalRx[i]) * (double) 8/1e5;     /* Convert Application RX Packets to MBits. */
+    double cur = (staSink->GetTotalRx() - lastTotalRx[i]) * (double) 8/1e6;     /* Convert Application RX Packets to MBits. */
     lastTotalRx[i] = staSink->GetTotalRx ();
     sum += cur;
   }
   avg = sum/nWifi;
-  double cur = (apSink->GetTotalRx() - lastTotalRxAp) * (double) 8/1e5;     /* Convert Application RX Packets to MBits. */
+  double cur = (apSink->GetTotalRx() - lastTotalRxAp) * (double) 8/1e6;     /* Convert Application RX Packets to MBits. */
   lastTotalRxAp = apSink->GetTotalRx ();
 
   //Write the value of avg Throughput to a file.
@@ -280,17 +280,18 @@ main (int argc, char *argv[])
   cmd.AddValue ("index", "index of the RAAs", index);
   cmd.Parse (argc,argv);
   /* ... */
-  string raas[] = {"ns3::ArfWifiManager",
+  string raas[] = {//"ns3::ArfWifiManager",
                    "ns3::AarfWifiManager",
-                   //"ns3::AarfcdWifiManager",
+                   "ns3::AarfcdWifiManager"
                    //"ns3::AmrrWifiManager",
                    //"ns3::CaraWifiManager",
                    //"ns3::IdealWifiManager",
-                   "ns3::MinstrelWifiManager"};
+                   //"ns3::MinstrelWifiManager"};
                    //"ns3::ParfWifiManager",
                    //"ns3::AparfWifiManager",
                    //"ns3::OnoeWifiManager",
-                   //"ns3::RraaWifiManager"};
+                   //"ns3::RraaWifiManager"
+                 };
     file.open ("./raa-eval-plots/" + raas[index] + " Average Throughput.txt", std::fstream::out);
     experiment(raas[index]);
 

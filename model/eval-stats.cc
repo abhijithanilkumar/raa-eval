@@ -53,7 +53,7 @@ EvalStats::CalculateThroughput()
   for (uint32_t i = 0; i < m_nodeNumber; ++i)
     {
       staSink = StaticCast<PacketSink>(m_sinkApps.Get(m_apNumber + i));
-      double curRxSta = (staSink->GetTotalRx() - m_lastTotalRxSta[i]) * (double) 8/1e5;
+      double curRxSta = (staSink->GetTotalRx() - m_lastTotalRxSta[i]) * (double) 8/1e6;
       m_lastTotalRxSta[i] = staSink->GetTotalRx ();
       sumRx += curRxSta;
     }

@@ -10,6 +10,7 @@ for directory in subdirectories[1:]:
 	for filename in os.listdir(directory):
 		if filename.endswith(".txt"):
 			filenames.append(filename)
+	combi = plt.figure(1)
 	for filename in filenames:
 		plt.clf()
 		f = open(directory + "/" +filename)
@@ -23,5 +24,7 @@ for directory in subdirectories[1:]:
 			xdata.append(line.split(', ')[0])
 			ydata.append(line.split(', ')[1])
 		plt.plot(xdata,ydata);
+		#combi.plot(xdata,ydata);
 		plt.savefig("raa-eval-graph/"+ directory.split("/")[1] + "/" + filename.split('.')[0]+"-graph.png")
 		f.close()
+	#combi.savefig("raa-eval-graph/"+ directory.split("/")[1]+"-graph.png")
